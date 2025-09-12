@@ -7,7 +7,7 @@ export default defineConfig({
 			exclude: [
 				'dist/**',
 				'vitest.config.ts',
-				'src/link-stats-type.ts',
+				'src/toggle-context.ts',
 			],
 		},
 	},
