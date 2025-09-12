@@ -59,21 +59,21 @@ describe("Hyphen sdk", () => {
 
 		test("should allow setting the publicApiKey property", () => {
 			const toggle = new Toggle();
-			const testApiKey = "test-api-key-123";
+			const testApiKey = "public_test-api-key-123";
 			toggle.publicApiKey = testApiKey;
 			expect(toggle.publicApiKey).toBe(testApiKey);
 		});
 
 		test("should allow setting publicApiKey to undefined", () => {
 			const toggle = new Toggle();
-			toggle.publicApiKey = "test-key";
+			toggle.publicApiKey = "public_test-key";
 			toggle.publicApiKey = undefined;
 			expect(toggle.publicApiKey).toBeUndefined();
 		});
 
 		test("should maintain the same publicApiKey value when accessed multiple times", () => {
 			const toggle = new Toggle();
-			const testApiKey = "consistent-api-key";
+			const testApiKey = "public_consistent-api-key";
 			toggle.publicApiKey = testApiKey;
 			const key1 = toggle.publicApiKey;
 			const key2 = toggle.publicApiKey;
@@ -83,13 +83,51 @@ describe("Hyphen sdk", () => {
 
 		test("should update publicApiKey property when set to a new value", () => {
 			const toggle = new Toggle();
-			const originalKey = "original-key";
-			const newKey = "new-key";
+			const originalKey = "public_original-key";
+			const newKey = "public_new-key";
 			toggle.publicApiKey = originalKey;
 			expect(toggle.publicApiKey).toBe(originalKey);
 			toggle.publicApiKey = newKey;
 			expect(toggle.publicApiKey).toBe(newKey);
 			expect(toggle.publicApiKey).not.toBe(originalKey);
+		});
+
+		test("should throw error when publicApiKey does not start with 'public_'", () => {
+			const toggle = new Toggle();
+			expect(() => {
+				toggle.publicApiKey = "invalid-key";
+			}).toThrow("Public API key must start with 'public_'");
+		});
+
+		test("should throw error when publicApiKey starts with different prefix", () => {
+			const toggle = new Toggle();
+			expect(() => {
+				toggle.publicApiKey = "private_some-key";
+			}).toThrow("Public API key must start with 'public_'");
+		});
+
+		test("should throw error when publicApiKey is empty string", () => {
+			const toggle = new Toggle();
+			expect(() => {
+				toggle.publicApiKey = "";
+			}).toThrow("Public API key must start with 'public_'");
+		});
+
+		test("should accept publicApiKey that starts with 'public_'", () => {
+			const toggle = new Toggle();
+			const validKey = "public_valid-key-123";
+			expect(() => {
+				toggle.publicApiKey = validKey;
+			}).not.toThrow();
+			expect(toggle.publicApiKey).toBe(validKey);
+		});
+
+		test("should accept undefined publicApiKey without throwing", () => {
+			const toggle = new Toggle();
+			expect(() => {
+				toggle.publicApiKey = undefined;
+			}).not.toThrow();
+			expect(toggle.publicApiKey).toBeUndefined();
 		});
 	});
 });
