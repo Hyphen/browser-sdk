@@ -1,12 +1,97 @@
 import { Net } from "@cacheable/net";
 import { describe, expect, test } from "vitest";
-import { Toggle } from "../src/index.js";
+import { Toggle, type ToggleOptions } from "../src/index.js";
 import type { ToggleContext } from "../src/toggle-context.js";
 
 describe("Hyphen sdk", () => {
 	test("should create an instance of Toggle", () => {
 		const toggle = new Toggle();
 		expect(toggle).toBeInstanceOf(Toggle);
+	});
+
+	describe("constructor", () => {
+		test("should create Toggle with no options", () => {
+			const toggle = new Toggle();
+			expect(toggle).toBeInstanceOf(Toggle);
+			expect(toggle.publicApiKey).toBeUndefined();
+			expect(toggle.defaultContext.targetingKey).toBe("");
+		});
+
+		test("should create Toggle with undefined options", () => {
+			const toggle = new Toggle(undefined);
+			expect(toggle).toBeInstanceOf(Toggle);
+			expect(toggle.publicApiKey).toBeUndefined();
+			expect(toggle.defaultContext.targetingKey).toBe("");
+		});
+
+		test("should create Toggle with empty options object", () => {
+			const options: ToggleOptions = {};
+			const toggle = new Toggle(options);
+			expect(toggle).toBeInstanceOf(Toggle);
+			expect(toggle.publicApiKey).toBeUndefined();
+			expect(toggle.defaultContext.targetingKey).toBe("");
+		});
+
+		test("should create Toggle with defaultContext option", () => {
+			const customContext: ToggleContext = {
+				targetingKey: "test-user-123",
+				ipAddress: "192.168.1.1",
+				customAttributes: {
+					region: "us-west",
+				},
+			};
+			const options: ToggleOptions = {
+				defaultContext: customContext,
+			};
+			const toggle = new Toggle(options);
+			expect(toggle).toBeInstanceOf(Toggle);
+			expect(toggle.defaultContext).toBe(customContext);
+			expect(toggle.defaultContext.targetingKey).toBe("test-user-123");
+			expect(toggle.defaultContext.ipAddress).toBe("192.168.1.1");
+			expect(toggle.publicApiKey).toBeUndefined();
+		});
+
+		test("should create Toggle with publicApiKey option", () => {
+			const options: ToggleOptions = {
+				publicApiKey: "public_test-api-key",
+			};
+			const toggle = new Toggle(options);
+			expect(toggle).toBeInstanceOf(Toggle);
+			expect(toggle.publicApiKey).toBe("public_test-api-key");
+			expect(toggle.defaultContext.targetingKey).toBe("");
+		});
+
+		test("should create Toggle with both defaultContext and publicApiKey options", () => {
+			const customContext: ToggleContext = {
+				targetingKey: "user-456",
+				user: {
+					id: "user-456",
+					email: "test@example.com",
+					name: "Test User",
+				},
+			};
+			const options: ToggleOptions = {
+				defaultContext: customContext,
+				publicApiKey: "public_comprehensive-key",
+			};
+			const toggle = new Toggle(options);
+			expect(toggle).toBeInstanceOf(Toggle);
+			expect(toggle.publicApiKey).toBe("public_comprehensive-key");
+			expect(toggle.defaultContext).toBe(customContext);
+			expect(toggle.defaultContext.targetingKey).toBe("user-456");
+			expect(toggle.defaultContext.user?.email).toBe("test@example.com");
+		});
+
+		test("should not validate publicApiKey in constructor", () => {
+			const options: ToggleOptions = {
+				publicApiKey: "invalid-key-without-prefix",
+			};
+			expect(() => {
+				new Toggle(options);
+			}).not.toThrow();
+			const toggle = new Toggle(options);
+			expect(toggle.publicApiKey).toBe("invalid-key-without-prefix");
+		});
 	});
 
 	describe("net property", () => {

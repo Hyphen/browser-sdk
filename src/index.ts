@@ -2,21 +2,36 @@ import { type CacheableNet, Net } from "@cacheable/net";
 import { Hookified } from "hookified";
 import type { ToggleContext } from "./toggle-context.js";
 
-/**
- * Hyphen Toggle is a feature flag service. https://hyphen.ai/toggle
- *
- * @example
- * ```typescript
- * const toggle = new Toggle();
- * toggle.publicApiKey = "your-api-key";
- * ```
- */
+export type ToggleOptions = {
+	/**
+	 * public api key
+	 */
+	publicApiKey?: string;
+
+	/**
+	 * The default context to use when once is not passed
+	 */
+	defaultContext?: ToggleContext;
+};
+
 export class Toggle extends Hookified {
 	private _net = new Net();
 	private _publicApiKey?: string;
 	private _defaultContext: ToggleContext = {
 		targetingKey: "",
 	};
+
+	constructor(options?: ToggleOptions) {
+		super();
+
+		if (options?.defaultContext) {
+			this._defaultContext = options.defaultContext;
+		}
+
+		if (options?.publicApiKey) {
+			this._publicApiKey = options.publicApiKey;
+		}
+	}
 
 	/**
 	 * Gets the network client instance used for HTTP requests.
