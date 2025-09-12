@@ -1,5 +1,6 @@
 import { type CacheableNet, Net } from "@cacheable/net";
 import { Hookified } from "hookified";
+import type { ToggleContext } from "./toggle-context.js";
 
 /**
  * Hyphen Toggle is a feature flag service. https://hyphen.ai/toggle
@@ -13,6 +14,9 @@ import { Hookified } from "hookified";
 export class Toggle extends Hookified {
 	private _net = new Net();
 	private _publicApiKey?: string;
+	private _defaultContext: ToggleContext = {
+		targetingKey: "",
+	};
 
 	/**
 	 * Gets the network client instance used for HTTP requests.
@@ -52,13 +56,30 @@ export class Toggle extends Hookified {
 	}
 
 	/**
-	 * Validates and sets the public API key.
+	 * Gets the default context used for toggle evaluations.
 	 *
-	 * @private
+	 * @returns The current default ToggleContext
+	 */
+	public get defaultContext(): ToggleContext {
+		return this._defaultContext;
+	}
+
+	/**
+	 * Sets the default context used for toggle evaluations.
+	 *
+	 * @param value - The ToggleContext to use as default
+	 */
+	public set defaultContext(value: ToggleContext) {
+		this._defaultContext = value;
+	}
+
+	/**
+	 * Validates and sets the public API key. This is used internally
+	 *
 	 * @param key - The public API key string or undefined to clear
 	 * @throws {Error} If the key doesn't start with "public_"
 	 */
-	private setPublicKey(key: string | undefined): void {
+	public setPublicKey(key: string | undefined): void {
 		if (key !== undefined && !key.startsWith("public_")) {
 			throw new Error("Public API key must start with 'public_'");
 		}

@@ -1,6 +1,7 @@
 import { Net } from "@cacheable/net";
 import { describe, expect, test } from "vitest";
 import { Toggle } from "../src/index.js";
+import type { ToggleContext } from "../src/toggle-context.js";
 
 describe("Hyphen sdk", () => {
 	test("should create an instance of Toggle", () => {
@@ -128,6 +129,89 @@ describe("Hyphen sdk", () => {
 				toggle.publicApiKey = undefined;
 			}).not.toThrow();
 			expect(toggle.publicApiKey).toBeUndefined();
+		});
+	});
+
+	describe("defaultContext property", () => {
+		test("should return default context with empty targetingKey", () => {
+			const toggle = new Toggle();
+			const context = toggle.defaultContext;
+			expect(context).toBeDefined();
+			expect(context.targetingKey).toBe("");
+		});
+
+		test("should allow getting the defaultContext property", () => {
+			const toggle = new Toggle();
+			const context = toggle.defaultContext;
+			expect(context).toBeDefined();
+			expect(typeof context).toBe("object");
+			expect(context).toHaveProperty("targetingKey");
+		});
+
+		test("should allow setting the defaultContext property", () => {
+			const toggle = new Toggle();
+			const customContext: ToggleContext = {
+				targetingKey: "test-user-123",
+				ipAddress: "192.168.1.1",
+				customAttributes: {
+					region: "us-west",
+				},
+			};
+			toggle.defaultContext = customContext;
+			expect(toggle.defaultContext).toBe(customContext);
+			expect(toggle.defaultContext.targetingKey).toBe("test-user-123");
+			expect(toggle.defaultContext.ipAddress).toBe("192.168.1.1");
+		});
+
+		test("should maintain the same defaultContext when accessed multiple times", () => {
+			const toggle = new Toggle();
+			const context1 = toggle.defaultContext;
+			const context2 = toggle.defaultContext;
+			expect(context1).toBe(context2);
+		});
+
+		test("should update defaultContext property when set to a new value", () => {
+			const toggle = new Toggle();
+			const originalContext = toggle.defaultContext;
+			const newContext: ToggleContext = {
+				targetingKey: "new-user-456",
+				user: {
+					id: "new-user-456",
+					email: "test@example.com",
+				},
+			};
+			toggle.defaultContext = newContext;
+			expect(toggle.defaultContext).not.toBe(originalContext);
+			expect(toggle.defaultContext).toBe(newContext);
+			expect(toggle.defaultContext.targetingKey).toBe("new-user-456");
+		});
+
+		test("should handle complex defaultContext with all properties", () => {
+			const toggle = new Toggle();
+			const complexContext: ToggleContext = {
+				targetingKey: "complex-user-789",
+				ipAddress: "203.0.113.42",
+				customAttributes: {
+					subscriptionLevel: "premium",
+					region: "us-east",
+					tier: "gold",
+				},
+				user: {
+					id: "complex-user-789",
+					email: "john.doe@example.com",
+					name: "John Doe",
+					customAttributes: {
+						role: "admin",
+						department: "engineering",
+					},
+				},
+			};
+			toggle.defaultContext = complexContext;
+			expect(toggle.defaultContext).toBe(complexContext);
+			expect(toggle.defaultContext.user?.customAttributes?.role).toBe("admin");
+			expect(toggle.defaultContext.customAttributes?.subscriptionLevel).toBe(
+				"premium",
+			);
 		});
 	});
 });
