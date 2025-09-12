@@ -44,4 +44,52 @@ describe("Hyphen sdk", () => {
 			expect(toggle.net).toBe(newNet);
 		});
 	});
+
+	describe("publicApiKey property", () => {
+		test("should return undefined by default", () => {
+			const toggle = new Toggle();
+			expect(toggle.publicApiKey).toBeUndefined();
+		});
+
+		test("should allow getting the publicApiKey property", () => {
+			const toggle = new Toggle();
+			const apiKey = toggle.publicApiKey;
+			expect(apiKey).toBeUndefined();
+		});
+
+		test("should allow setting the publicApiKey property", () => {
+			const toggle = new Toggle();
+			const testApiKey = "test-api-key-123";
+			toggle.publicApiKey = testApiKey;
+			expect(toggle.publicApiKey).toBe(testApiKey);
+		});
+
+		test("should allow setting publicApiKey to undefined", () => {
+			const toggle = new Toggle();
+			toggle.publicApiKey = "test-key";
+			toggle.publicApiKey = undefined;
+			expect(toggle.publicApiKey).toBeUndefined();
+		});
+
+		test("should maintain the same publicApiKey value when accessed multiple times", () => {
+			const toggle = new Toggle();
+			const testApiKey = "consistent-api-key";
+			toggle.publicApiKey = testApiKey;
+			const key1 = toggle.publicApiKey;
+			const key2 = toggle.publicApiKey;
+			expect(key1).toBe(key2);
+			expect(key1).toBe(testApiKey);
+		});
+
+		test("should update publicApiKey property when set to a new value", () => {
+			const toggle = new Toggle();
+			const originalKey = "original-key";
+			const newKey = "new-key";
+			toggle.publicApiKey = originalKey;
+			expect(toggle.publicApiKey).toBe(originalKey);
+			toggle.publicApiKey = newKey;
+			expect(toggle.publicApiKey).toBe(newKey);
+			expect(toggle.publicApiKey).not.toBe(originalKey);
+		});
+	});
 });
