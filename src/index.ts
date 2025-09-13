@@ -143,14 +143,15 @@ export class Toggle extends Hookified {
 	}
 
 	/**
-	 * Makes an HTTP request to the specified URL with automatic authentication.
+	 * Makes an HTTP POST request to the specified URL with automatic authentication.
 	 *
 	 * This method uses browser-compatible fetch and automatically includes the
-	 * public API key in the Authorization header if available. It supports load
+	 * public API key in the x-api-key header if available. It supports load
 	 * balancing across multiple horizon URLs with fallback behavior.
 	 *
 	 * @template T - The expected response type
 	 * @param path - The API path to request (e.g., '/api/toggles')
+	 * @param payload - The JSON payload to send in the request body
 	 * @param options - Optional fetch configuration
 	 * @returns Promise resolving to the parsed JSON response
 	 * @throws {Error} If no horizon URLs are configured or all requests fail
@@ -167,11 +168,17 @@ export class Toggle extends Hookified {
 	 *   value: string;
 	 * }
 	 *
-	 * const result = await toggle.fetch<ToggleResponse>('/api/toggle/feature-flag');
+	 * const result = await toggle.fetch<ToggleResponse>('/api/toggle/feature-flag', {
+	 *   context: { targetingKey: 'user-123' }
+	 * });
 	 * console.log(result.enabled); // true/false
 	 * ```
 	 */
-	public async fetch<T>(path: string, options?: RequestInit): Promise<T> {
+	public async fetch<T>(
+		path: string,
+		payload?: unknown,
+		options?: RequestInit,
+	): Promise<T> {
 		if (this._horizonUrls.length === 0) {
 			throw new Error(
 				"No horizon URLs configured. Set horizonUrls or provide a valid publicApiKey.",
@@ -197,13 +204,14 @@ export class Toggle extends Hookified {
 		}
 
 		if (this._publicApiKey) {
-			headers.Authorization = `Bearer ${this._publicApiKey}`;
+			headers["x-api-key"] = this._publicApiKey;
 		}
 
 		const fetchOptions: RequestInit = {
-			method: "GET",
+			method: "POST",
 			...options,
 			headers,
+			body: payload ? JSON.stringify(payload) : options?.body,
 		};
 
 		const errors: Error[] = [];
