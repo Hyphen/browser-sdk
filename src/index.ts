@@ -100,4 +100,23 @@ export class Toggle extends Hookified {
 		}
 		this._publicApiKey = key;
 	}
+
+	public getOrgIdFromPublicKey(publicKey: string): string | undefined {
+		try {
+			const keyWithoutPrefix = publicKey.replace(/^public_/, "");
+			const decoded = Buffer.from(keyWithoutPrefix, "base64").toString();
+			const [orgId] = decoded.split(":");
+			const isValidOrgId = /^[a-zA-Z0-9_-]+$/.test(orgId);
+			return isValidOrgId ? orgId : undefined;
+		} catch {
+			return undefined;
+		}
+	}
+
+	public buildDefaultHorizonUrl(publicKey: string): string {
+		const orgId = this.getOrgIdFromPublicKey(publicKey);
+		return orgId
+			? `https://${orgId}.toggle.hyphen.cloud`
+			: "https://toggle.hyphen.cloud";
+	}
 }
