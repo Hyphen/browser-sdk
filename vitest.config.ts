@@ -7,6 +7,7 @@ export default defineConfig({
 			exclude: [
 				'dist/**',
 				'vitest.config.ts',
+				'tsup.config.ts',
 				'src/toggle-context.ts',
 			],
 		},

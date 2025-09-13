@@ -5,8 +5,10 @@
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
+  "browser": "dist/index.browser.js",
   "exports": {
     ".": {
+      "browser": "./dist/index.browser.js",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
@@ -16,9 +18,9 @@
     "lint": "biome check --write --error-on-warnings",
     "test": "pnpm lint && vitest run --coverage",
     "test:ci": "biome check --error-on-warnings && vitest run --coverage",
-    "build": "rimraf ./dist && tsup src/index.ts --format esm,cjs --dts --clean",
+    "build": "rimraf ./dist && tsup",
     "clean": "rimraf ./dist pnpm-lock.yaml node_modules coverage",
-    "prepublishOnly": "rimraf ./dist && tsup src/index.ts --format esm,cjs --dts --clean"
+    "prepare": "rimraf ./dist && tsup"
   },
   "keywords": [
     "hyphen",
@@ -50,9 +52,6 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@cacheable/net": "^1.0.1",
-    "dotenv": "^17.2.2",
-    "hookified": "^1.12.0",
-    "pino": "^9.9.5"
+    "hookified": "^1.12.0"
   }
 }

@@ -1,4 +1,3 @@
-import { type CacheableNet, Net } from "@cacheable/net";
 import { Hookified } from "hookified";
 import type { ToggleContext } from "./toggle-context.js";
 
@@ -23,7 +22,6 @@ export type ToggleOptions = {
 };
 
 export class Toggle extends Hookified {
-	private _net = new Net();
 	private _publicApiKey?: string;
 	private _defaultContext: ToggleContext = {
 		targetingKey: "",
@@ -50,24 +48,6 @@ export class Toggle extends Hookified {
 				this._horizonUrls = [this.getDefaultHorizonUrl(this._publicApiKey)];
 			}
 		}
-	}
-
-	/**
-	 * Gets the network client instance used for HTTP requests.
-	 *
-	 * @returns The current CacheableNet instance
-	 */
-	public get net(): CacheableNet {
-		return this._net;
-	}
-
-	/**
-	 * Sets the network client instance used for HTTP requests.
-	 *
-	 * @param value - The CacheableNet instance to use
-	 */
-	public set net(value: CacheableNet) {
-		this._net = value;
 	}
 
 	/**
