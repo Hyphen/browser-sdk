@@ -1,7 +1,7 @@
 import { Hookified } from "hookified";
-import type { ToggleContext } from "./toggle-context.js";
+import type { ToggleContext } from "./types.js";
 
-export type { ToggleContext } from "./toggle-context.js";
+export type { ToggleContext } from "./types.js";
 
 export type ToggleOptions = {
 	/**
@@ -21,15 +21,20 @@ export type ToggleOptions = {
 	 * @see {@link https://hyphen.ai/horizon} for more information
 	 */
 	horizonUrls?: string[];
+
+	applicationId?: string;
+
+	environment?: string;
 };
 
 export class Toggle extends Hookified {
 	private _publicApiKey?: string;
-	private _defaultContext: ToggleContext = {
-		targetingKey: "",
-	};
 	private _organizationId: string | undefined;
+	private _applicationId: string | undefined;
+	private _environment: string | undefined;
 	private _horizonUrls: string[] = [];
+
+	private _defaultContext: ToggleContext | undefined;
 
 	constructor(options?: ToggleOptions) {
 		super();
@@ -49,6 +54,16 @@ export class Toggle extends Hookified {
 			if (this._publicApiKey) {
 				this._horizonUrls = [this.getDefaultHorizonUrl(this._publicApiKey)];
 			}
+		}
+
+		if (options?.applicationId) {
+			this._applicationId = options.applicationId;
+		}
+
+		if (options?.environment) {
+			this._environment = options.environment;
+		} else {
+			this._environment = "development";
 		}
 	}
 
@@ -76,7 +91,7 @@ export class Toggle extends Hookified {
 	 *
 	 * @returns The current default ToggleContext
 	 */
-	public get defaultContext(): ToggleContext {
+	public get defaultContext(): ToggleContext | undefined {
 		return this._defaultContext;
 	}
 
@@ -140,6 +155,42 @@ export class Toggle extends Hookified {
 	 */
 	public set horizonUrls(value: string[]) {
 		this._horizonUrls = value;
+	}
+
+	/**
+	 * Gets the application ID used for toggle context.
+	 *
+	 * @returns The current application ID or undefined if not set
+	 */
+	public get applicationId(): string | undefined {
+		return this._applicationId;
+	}
+
+	/**
+	 * Sets the application ID used for toggle context.
+	 *
+	 * @param value - The application ID string or undefined to clear
+	 */
+	public set applicationId(value: string | undefined) {
+		this._applicationId = value;
+	}
+
+	/**
+	 * Gets the environment used for toggle context.
+	 *
+	 * @returns The current environment (defaults to 'development')
+	 */
+	public get environment(): string | undefined {
+		return this._environment;
+	}
+
+	/**
+	 * Sets the environment used for toggle context.
+	 *
+	 * @param value - The environment string or undefined to clear
+	 */
+	public set environment(value: string | undefined) {
+		this._environment = value;
 	}
 
 	/**

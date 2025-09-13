@@ -72,3 +72,15 @@ export type ToggleContext = {
 	 */
 	user?: ToggleUser;
 };
+
+export interface Evaluation {
+	key: string;
+	value: boolean | string | number | Record<string, unknown>;
+	type: "boolean" | "string" | "number" | "object";
+	reason?: unknown;
+	errorMessage?: string;
+}
+
+export interface EvaluationResponse {
+	toggles: Record<string, Evaluation>;
+}

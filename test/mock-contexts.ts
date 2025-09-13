@@ -1,4 +1,4 @@
-import type { ToggleContext } from "../src/toggle-context.js";
+import type { ToggleContext } from "../src/types.js";
 
 /**
  * Mock ToggleContext examples for testing purposes.

@@ -16,14 +16,14 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle();
 			expect(toggle).toBeInstanceOf(Toggle);
 			expect(toggle.publicApiKey).toBeUndefined();
-			expect(toggle.defaultContext.targetingKey).toBe("");
+			expect(toggle.defaultContext).toBeUndefined();
 		});
 
 		test("should create Toggle with undefined options", () => {
 			const toggle = new Toggle(undefined);
 			expect(toggle).toBeInstanceOf(Toggle);
 			expect(toggle.publicApiKey).toBeUndefined();
-			expect(toggle.defaultContext.targetingKey).toBe("");
+			expect(toggle.defaultContext).toBeUndefined();
 		});
 
 		test("should create Toggle with empty options object", () => {
@@ -31,7 +31,7 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle(options);
 			expect(toggle).toBeInstanceOf(Toggle);
 			expect(toggle.publicApiKey).toBeUndefined();
-			expect(toggle.defaultContext.targetingKey).toBe("");
+			expect(toggle.defaultContext).toBeUndefined();
 		});
 
 		test("should create Toggle with defaultContext option", () => {
@@ -42,10 +42,10 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle(options);
 			expect(toggle).toBeInstanceOf(Toggle);
 			expect(toggle.defaultContext).toBe(customContext);
-			expect(toggle.defaultContext.targetingKey).toBe(
+			expect(toggle.defaultContext?.targetingKey).toBe(
 				customContext.targetingKey,
 			);
-			expect(toggle.defaultContext.ipAddress).toBe(customContext.ipAddress);
+			expect(toggle.defaultContext?.ipAddress).toBe(customContext.ipAddress);
 			expect(toggle.publicApiKey).toBeUndefined();
 		});
 
@@ -56,7 +56,7 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle(options);
 			expect(toggle).toBeInstanceOf(Toggle);
 			expect(toggle.publicApiKey).toBe("public_test-api-key");
-			expect(toggle.defaultContext.targetingKey).toBe("");
+			expect(toggle.defaultContext).toBeUndefined();
 		});
 
 		test("should create Toggle with both defaultContext and publicApiKey options", () => {
@@ -69,10 +69,12 @@ describe("Hyphen sdk", () => {
 			expect(toggle).toBeInstanceOf(Toggle);
 			expect(toggle.publicApiKey).toBe("public_comprehensive-key");
 			expect(toggle.defaultContext).toBe(customContext);
-			expect(toggle.defaultContext.targetingKey).toBe(
+			expect(toggle.defaultContext?.targetingKey).toBe(
 				customContext.targetingKey,
 			);
-			expect(toggle.defaultContext.user?.email).toBe(customContext.user?.email);
+			expect(toggle.defaultContext?.user?.email).toBe(
+				customContext.user?.email,
+			);
 		});
 
 		test("should not validate publicApiKey in constructor", () => {
@@ -174,19 +176,16 @@ describe("Hyphen sdk", () => {
 	});
 
 	describe("defaultContext property", () => {
-		test("should return default context with empty targetingKey", () => {
+		test("should return undefined when no defaultContext is set", () => {
 			const toggle = new Toggle();
 			const context = toggle.defaultContext;
-			expect(context).toBeDefined();
-			expect(context.targetingKey).toBe("");
+			expect(context).toBeUndefined();
 		});
 
 		test("should allow getting the defaultContext property", () => {
 			const toggle = new Toggle();
 			const context = toggle.defaultContext;
-			expect(context).toBeDefined();
-			expect(typeof context).toBe("object");
-			expect(context).toHaveProperty("targetingKey");
+			expect(context).toBeUndefined();
 		});
 
 		test("should allow setting the defaultContext property", () => {
@@ -194,14 +193,16 @@ describe("Hyphen sdk", () => {
 			const customContext = getRandomToggleContext();
 			toggle.defaultContext = customContext;
 			expect(toggle.defaultContext).toBe(customContext);
-			expect(toggle.defaultContext.targetingKey).toBe(
+			expect(toggle.defaultContext?.targetingKey).toBe(
 				customContext.targetingKey,
 			);
-			expect(toggle.defaultContext.ipAddress).toBe(customContext.ipAddress);
+			expect(toggle.defaultContext?.ipAddress).toBe(customContext.ipAddress);
 		});
 
 		test("should maintain the same defaultContext when accessed multiple times", () => {
 			const toggle = new Toggle();
+			const customContext = getRandomToggleContext();
+			toggle.defaultContext = customContext;
 			const context1 = toggle.defaultContext;
 			const context2 = toggle.defaultContext;
 			expect(context1).toBe(context2);
@@ -209,12 +210,12 @@ describe("Hyphen sdk", () => {
 
 		test("should update defaultContext property when set to a new value", () => {
 			const toggle = new Toggle();
-			const originalContext = toggle.defaultContext;
+			const originalContext = toggle.defaultContext; // undefined
 			const newContext = getRandomToggleContext();
 			toggle.defaultContext = newContext;
 			expect(toggle.defaultContext).not.toBe(originalContext);
 			expect(toggle.defaultContext).toBe(newContext);
-			expect(toggle.defaultContext.targetingKey).toBe(newContext.targetingKey);
+			expect(toggle.defaultContext?.targetingKey).toBe(newContext.targetingKey);
 		});
 
 		test("should handle complex defaultContext with all properties", () => {
@@ -223,12 +224,12 @@ describe("Hyphen sdk", () => {
 			const complexContext = mockToggleContexts[9];
 			toggle.defaultContext = complexContext;
 			expect(toggle.defaultContext).toBe(complexContext);
-			expect(toggle.defaultContext.user?.customAttributes?.tags).toEqual([
+			expect(toggle.defaultContext?.user?.customAttributes?.tags).toEqual([
 				"vip",
 				"beta-tester",
 				"early-adopter",
 			]);
-			expect(toggle.defaultContext.customAttributes?.complexData).toEqual({
+			expect(toggle.defaultContext?.customAttributes?.complexData).toEqual({
 				nested: {
 					value: "deep-nested-value",
 					array: [1, 2, 3],
@@ -379,6 +380,70 @@ describe("Hyphen sdk", () => {
 			];
 			toggle.horizonUrls = complexUrls;
 			expect(toggle.horizonUrls).toEqual(complexUrls);
+		});
+	});
+
+	describe("applicationId property", () => {
+		test("should return undefined by default", () => {
+			const toggle = new Toggle();
+			expect(toggle.applicationId).toBeUndefined();
+		});
+
+		test("should be set when constructor receives applicationId option", () => {
+			const toggle = new Toggle({ applicationId: "test-app" });
+			expect(toggle.applicationId).toBe("test-app");
+		});
+
+		test("should allow getting the applicationId property", () => {
+			const toggle = new Toggle();
+			const appId = toggle.applicationId;
+			expect(appId).toBeUndefined();
+		});
+
+		test("should allow setting the applicationId property", () => {
+			const toggle = new Toggle();
+			const testAppId = "my-application";
+			toggle.applicationId = testAppId;
+			expect(toggle.applicationId).toBe(testAppId);
+		});
+
+		test("should allow setting applicationId to undefined", () => {
+			const toggle = new Toggle();
+			toggle.applicationId = "test-app";
+			toggle.applicationId = undefined;
+			expect(toggle.applicationId).toBeUndefined();
+		});
+	});
+
+	describe("environment property", () => {
+		test("should return 'development' by default", () => {
+			const toggle = new Toggle();
+			expect(toggle.environment).toBe("development");
+		});
+
+		test("should be set when constructor receives environment option", () => {
+			const toggle = new Toggle({ environment: "production" });
+			expect(toggle.environment).toBe("production");
+		});
+
+		test("should allow getting the environment property", () => {
+			const toggle = new Toggle();
+			const env = toggle.environment;
+			expect(env).toBe("development");
+		});
+
+		test("should allow setting the environment property", () => {
+			const toggle = new Toggle();
+			const testEnv = "staging";
+			toggle.environment = testEnv;
+			expect(toggle.environment).toBe(testEnv);
+		});
+
+		test("should allow setting environment to undefined", () => {
+			const toggle = new Toggle();
+			toggle.environment = "production";
+			toggle.environment = undefined;
+			expect(toggle.environment).toBeUndefined();
 		});
 	});
 
