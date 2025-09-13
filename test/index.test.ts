@@ -300,6 +300,106 @@ describe("Hyphen sdk", () => {
 		});
 	});
 
+	describe("organizationId property", () => {
+		test("should return undefined by default", () => {
+			const toggle = new Toggle();
+			expect(toggle.organizationId).toBeUndefined();
+		});
+
+		test("should be set when constructor receives valid publicApiKey", () => {
+			const orgId = "test-org";
+			const validKey = `public_${Buffer.from(`${orgId}:some-secret`).toString("base64")}`;
+			const toggle = new Toggle({ publicApiKey: validKey });
+			expect(toggle.organizationId).toBe(orgId);
+		});
+
+		test("should remain undefined when constructor receives invalid publicApiKey", () => {
+			const toggle = new Toggle({ publicApiKey: "invalid-key" });
+			expect(toggle.organizationId).toBeUndefined();
+		});
+
+		test("should allow getting the organizationId property", () => {
+			const toggle = new Toggle();
+			const orgId = toggle.organizationId;
+			expect(orgId).toBeUndefined();
+		});
+
+		test("should allow setting the organizationId property", () => {
+			const toggle = new Toggle();
+			const testOrgId = "test-org-123";
+			toggle.organizationId = testOrgId;
+			expect(toggle.organizationId).toBe(testOrgId);
+		});
+
+		test("should allow setting organizationId to undefined", () => {
+			const toggle = new Toggle();
+			toggle.organizationId = "test-org";
+			toggle.organizationId = undefined;
+			expect(toggle.organizationId).toBeUndefined();
+		});
+
+		test("should maintain the same organizationId value when accessed multiple times", () => {
+			const toggle = new Toggle();
+			const testOrgId = "consistent-org-id";
+			toggle.organizationId = testOrgId;
+			const orgId1 = toggle.organizationId;
+			const orgId2 = toggle.organizationId;
+			expect(orgId1).toBe(orgId2);
+			expect(orgId1).toBe(testOrgId);
+		});
+
+		test("should update organizationId property when set to a new value", () => {
+			const toggle = new Toggle();
+			const originalOrgId = "original-org";
+			const newOrgId = "new-org";
+			toggle.organizationId = originalOrgId;
+			expect(toggle.organizationId).toBe(originalOrgId);
+			toggle.organizationId = newOrgId;
+			expect(toggle.organizationId).toBe(newOrgId);
+			expect(toggle.organizationId).not.toBe(originalOrgId);
+		});
+
+		test("should handle complex organizationId values", () => {
+			const toggle = new Toggle();
+			const complexOrgId = "complex-org_123-test";
+			toggle.organizationId = complexOrgId;
+			expect(toggle.organizationId).toBe(complexOrgId);
+		});
+
+		test("should handle numeric organizationId values", () => {
+			const toggle = new Toggle();
+			const numericOrgId = "123456";
+			toggle.organizationId = numericOrgId;
+			expect(toggle.organizationId).toBe(numericOrgId);
+		});
+
+		test("should handle single character organizationId", () => {
+			const toggle = new Toggle();
+			const singleCharOrgId = "a";
+			toggle.organizationId = singleCharOrgId;
+			expect(toggle.organizationId).toBe(singleCharOrgId);
+		});
+
+		test("should handle empty string organizationId", () => {
+			const toggle = new Toggle();
+			const emptyOrgId = "";
+			toggle.organizationId = emptyOrgId;
+			expect(toggle.organizationId).toBe(emptyOrgId);
+		});
+
+		test("should not interfere with other properties", () => {
+			const toggle = new Toggle();
+			const testOrgId = "test-org";
+			const testContext = { targetingKey: "test-user" };
+
+			toggle.organizationId = testOrgId;
+			toggle.defaultContext = testContext;
+
+			expect(toggle.organizationId).toBe(testOrgId);
+			expect(toggle.defaultContext).toBe(testContext);
+		});
+	});
+
 	describe("getOrgIdFromPublicKey", () => {
 		test("should extract org ID from valid public key", () => {
 			const toggle = new Toggle();
