@@ -8,7 +8,7 @@
 
 # Hyphen Node.js Toggle SDK
 
-The Hyphen Toggle SDK is used as a base library to get evaluations and works across browser and nodejs. For the full featured sdk use [@hyphen/sdk](https://npmjs.com/package/@hyphen/sdk)
+The Hyphen Browser SDK is used as a base library to get evaluations and works for browsers and the base for javascript libraries such as react, vuejs, svelte, etc . For the full featured nodejs sdk use [@hyphen/sdk](https://npmjs.com/package/@hyphen/sdk)
 
 # Table of Contents
 - [Installation](#installation)
@@ -17,11 +17,7 @@ The Hyphen Toggle SDK is used as a base library to get evaluations and works acr
 
 # Installation
 
-To install the Hyphen Node.js SDK, you can use npm or yarn. Run the following command in your terminal:
 
-```bash
-npm install @hyphen/toggle
-```
 
 # Contributing
 
