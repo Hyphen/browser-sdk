@@ -613,17 +613,17 @@ describe("Hyphen sdk", () => {
 		});
 	});
 
-	describe("get method", () => {
+	describe("fetch method", () => {
 		test("should throw error when no horizon URLs are configured", async () => {
 			const toggle = new Toggle();
-			await expect(toggle.get("/api/test")).rejects.toThrow(
+			await expect(toggle.fetch("/api/test")).rejects.toThrow(
 				"No horizon URLs configured. Set horizonUrls or provide a valid publicApiKey.",
 			);
 		});
 
 		test("should throw error when horizon URLs array is empty", async () => {
 			const toggle = new Toggle({ horizonUrls: [] });
-			await expect(toggle.get("/api/test")).rejects.toThrow(
+			await expect(toggle.fetch("/api/test")).rejects.toThrow(
 				"No horizon URLs configured. Set horizonUrls or provide a valid publicApiKey.",
 			);
 		});
@@ -637,7 +637,7 @@ describe("Hyphen sdk", () => {
 				queryParams: Record<string, string>;
 			}
 
-			const result = await toggle.get<MockHttpResponse>("/get");
+			const result = await toggle.fetch<MockHttpResponse>("/get");
 			expect(result.method).toBe("GET");
 			expect(result.headers).toBeDefined();
 			expect(result.queryParams).toBeDefined();
@@ -646,13 +646,13 @@ describe("Hyphen sdk", () => {
 		test("should handle 404 error response from mockhttp.org", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			await expect(toggle.get("/status/404")).rejects.toThrow("HTTP 404");
+			await expect(toggle.fetch("/status/404")).rejects.toThrow("HTTP 404");
 		});
 
 		test("should handle 500 error response from mockhttp.org", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			await expect(toggle.get("/status/500")).rejects.toThrow("HTTP 500");
+			await expect(toggle.fetch("/status/500")).rejects.toThrow("HTTP 500");
 		});
 
 		test("should return typed JSON response with query parameters", async () => {
@@ -666,7 +666,7 @@ describe("Hyphen sdk", () => {
 				};
 			}
 
-			const result = await toggle.get<MockHttpGetResponse>(
+			const result = await toggle.fetch<MockHttpGetResponse>(
 				"/get?test=hello&number=42",
 			);
 			expect(result.method).toBe("GET");
@@ -685,7 +685,7 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.get<MockHttpResponse>("/get");
+			const result = await toggle.fetch<MockHttpResponse>("/get");
 			expect(result.method).toBe("GET");
 			expect(result.headers.authorization).toBe("Bearer public_test-key");
 		});
@@ -698,7 +698,7 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.get<MockHttpResponse>("/get", {
+			const result = await toggle.fetch<MockHttpResponse>("/get", {
 				headers: { "X-Custom-Header": "test-value" },
 			});
 
@@ -709,14 +709,14 @@ describe("Hyphen sdk", () => {
 		test("should work with path without leading slash", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			const result = await toggle.get("get");
+			const result = await toggle.fetch("get");
 			expect(result).toBeDefined();
 		});
 
 		test("should work with path with leading slash", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			const result = await toggle.get("/get");
+			const result = await toggle.fetch("/get");
 			expect(result).toBeDefined();
 		});
 
@@ -728,7 +728,7 @@ describe("Hyphen sdk", () => {
 				],
 			});
 
-			const result = await toggle.get("/get");
+			const result = await toggle.fetch("/get");
 			expect(result).toBeDefined();
 		});
 
@@ -740,7 +740,7 @@ describe("Hyphen sdk", () => {
 				],
 			});
 
-			await expect(toggle.get("/test")).rejects.toThrow(
+			await expect(toggle.fetch("/test")).rejects.toThrow(
 				"All horizon URLs failed",
 			);
 		});
@@ -748,7 +748,7 @@ describe("Hyphen sdk", () => {
 		test("should handle URLs with trailing slashes correctly", async () => {
 			const toggle = new Toggle({ horizonUrls: [`${baseMockUrl}/`] });
 
-			const result = await toggle.get("/get");
+			const result = await toggle.fetch("/get");
 			expect(result).toBeDefined();
 		});
 
@@ -763,7 +763,7 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.get<MockHttpResponse>("/get", {
+			const result = await toggle.fetch<MockHttpResponse>("/get", {
 				headers: headers,
 			});
 
@@ -779,7 +779,7 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.get<MockHttpResponse>("/get", {
+			const result = await toggle.fetch<MockHttpResponse>("/get", {
 				headers: [
 					["X-Array-Header", "array-value"],
 					["X-Another-Header", "another-value"],
@@ -791,7 +791,7 @@ describe("Hyphen sdk", () => {
 			expect(result.headers["x-another-header"]).toBe("another-value");
 		});
 
-		test("should handle non-Error exceptions in get method", async () => {
+		test("should handle non-Error exceptions in fetch method", async () => {
 			const toggle = new Toggle({
 				horizonUrls: ["https://invalid-domain-that-does-not-exist.test"],
 			});
@@ -803,7 +803,7 @@ describe("Hyphen sdk", () => {
 			}) as typeof fetch;
 
 			try {
-				await expect(toggle.get("/test")).rejects.toThrow(
+				await expect(toggle.fetch("/test")).rejects.toThrow(
 					"All horizon URLs failed",
 				);
 			} finally {
