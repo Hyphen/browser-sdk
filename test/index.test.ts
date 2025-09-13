@@ -1,7 +1,7 @@
 import { Net } from "@cacheable/net";
 import { describe, expect, test } from "vitest";
 import { Toggle, type ToggleOptions } from "../src/index.js";
-import type { ToggleContext } from "../src/toggle-context.js";
+import { getRandomToggleContext, mockToggleContexts } from "./mock-contexts.js";
 
 describe("Hyphen sdk", () => {
 	test("should create an instance of Toggle", () => {
@@ -33,21 +33,17 @@ describe("Hyphen sdk", () => {
 		});
 
 		test("should create Toggle with defaultContext option", () => {
-			const customContext: ToggleContext = {
-				targetingKey: "test-user-123",
-				ipAddress: "192.168.1.1",
-				customAttributes: {
-					region: "us-west",
-				},
-			};
+			const customContext = getRandomToggleContext();
 			const options: ToggleOptions = {
 				defaultContext: customContext,
 			};
 			const toggle = new Toggle(options);
 			expect(toggle).toBeInstanceOf(Toggle);
 			expect(toggle.defaultContext).toBe(customContext);
-			expect(toggle.defaultContext.targetingKey).toBe("test-user-123");
-			expect(toggle.defaultContext.ipAddress).toBe("192.168.1.1");
+			expect(toggle.defaultContext.targetingKey).toBe(
+				customContext.targetingKey,
+			);
+			expect(toggle.defaultContext.ipAddress).toBe(customContext.ipAddress);
 			expect(toggle.publicApiKey).toBeUndefined();
 		});
 
@@ -62,14 +58,7 @@ describe("Hyphen sdk", () => {
 		});
 
 		test("should create Toggle with both defaultContext and publicApiKey options", () => {
-			const customContext: ToggleContext = {
-				targetingKey: "user-456",
-				user: {
-					id: "user-456",
-					email: "test@example.com",
-					name: "Test User",
-				},
-			};
+			const customContext = getRandomToggleContext();
 			const options: ToggleOptions = {
 				defaultContext: customContext,
 				publicApiKey: "public_comprehensive-key",
@@ -78,8 +67,10 @@ describe("Hyphen sdk", () => {
 			expect(toggle).toBeInstanceOf(Toggle);
 			expect(toggle.publicApiKey).toBe("public_comprehensive-key");
 			expect(toggle.defaultContext).toBe(customContext);
-			expect(toggle.defaultContext.targetingKey).toBe("user-456");
-			expect(toggle.defaultContext.user?.email).toBe("test@example.com");
+			expect(toggle.defaultContext.targetingKey).toBe(
+				customContext.targetingKey,
+			);
+			expect(toggle.defaultContext.user?.email).toBe(customContext.user?.email);
 		});
 
 		test("should not validate publicApiKey in constructor", () => {
@@ -235,17 +226,13 @@ describe("Hyphen sdk", () => {
 
 		test("should allow setting the defaultContext property", () => {
 			const toggle = new Toggle();
-			const customContext: ToggleContext = {
-				targetingKey: "test-user-123",
-				ipAddress: "192.168.1.1",
-				customAttributes: {
-					region: "us-west",
-				},
-			};
+			const customContext = getRandomToggleContext();
 			toggle.defaultContext = customContext;
 			expect(toggle.defaultContext).toBe(customContext);
-			expect(toggle.defaultContext.targetingKey).toBe("test-user-123");
-			expect(toggle.defaultContext.ipAddress).toBe("192.168.1.1");
+			expect(toggle.defaultContext.targetingKey).toBe(
+				customContext.targetingKey,
+			);
+			expect(toggle.defaultContext.ipAddress).toBe(customContext.ipAddress);
 		});
 
 		test("should maintain the same defaultContext when accessed multiple times", () => {
@@ -258,45 +245,30 @@ describe("Hyphen sdk", () => {
 		test("should update defaultContext property when set to a new value", () => {
 			const toggle = new Toggle();
 			const originalContext = toggle.defaultContext;
-			const newContext: ToggleContext = {
-				targetingKey: "new-user-456",
-				user: {
-					id: "new-user-456",
-					email: "test@example.com",
-				},
-			};
+			const newContext = getRandomToggleContext();
 			toggle.defaultContext = newContext;
 			expect(toggle.defaultContext).not.toBe(originalContext);
 			expect(toggle.defaultContext).toBe(newContext);
-			expect(toggle.defaultContext.targetingKey).toBe("new-user-456");
+			expect(toggle.defaultContext.targetingKey).toBe(newContext.targetingKey);
 		});
 
 		test("should handle complex defaultContext with all properties", () => {
 			const toggle = new Toggle();
-			const complexContext: ToggleContext = {
-				targetingKey: "complex-user-789",
-				ipAddress: "203.0.113.42",
-				customAttributes: {
-					subscriptionLevel: "premium",
-					region: "us-east",
-					tier: "gold",
-				},
-				user: {
-					id: "complex-user-789",
-					email: "john.doe@example.com",
-					name: "John Doe",
-					customAttributes: {
-						role: "admin",
-						department: "engineering",
-					},
-				},
-			};
+			// Using specific index for edge case user to test complex nested data structures
+			const complexContext = mockToggleContexts[9];
 			toggle.defaultContext = complexContext;
 			expect(toggle.defaultContext).toBe(complexContext);
-			expect(toggle.defaultContext.user?.customAttributes?.role).toBe("admin");
-			expect(toggle.defaultContext.customAttributes?.subscriptionLevel).toBe(
-				"premium",
-			);
+			expect(toggle.defaultContext.user?.customAttributes?.tags).toEqual([
+				"vip",
+				"beta-tester",
+				"early-adopter",
+			]);
+			expect(toggle.defaultContext.customAttributes?.complexData).toEqual({
+				nested: {
+					value: "deep-nested-value",
+					array: [1, 2, 3],
+				},
+			});
 		});
 	});
 
@@ -390,7 +362,7 @@ describe("Hyphen sdk", () => {
 		test("should not interfere with other properties", () => {
 			const toggle = new Toggle();
 			const testOrgId = "test-org";
-			const testContext = { targetingKey: "test-user" };
+			const testContext = getRandomToggleContext();
 
 			toggle.organizationId = testOrgId;
 			toggle.defaultContext = testContext;
