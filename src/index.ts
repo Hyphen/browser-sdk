@@ -143,10 +143,10 @@ export class Toggle extends Hookified {
 	}
 
 	/**
-	 * Makes an HTTP request to the specified URL with automatic authentication.
+	 * Makes an HTTP POST request to the specified URL with automatic authentication.
 	 *
 	 * This method uses browser-compatible fetch and automatically includes the
-	 * public API key in the Authorization header if available. It supports load
+	 * public API key in the x-api-key header if available. It supports load
 	 * balancing across multiple horizon URLs with fallback behavior.
 	 *
 	 * @template T - The expected response type
@@ -197,11 +197,11 @@ export class Toggle extends Hookified {
 		}
 
 		if (this._publicApiKey) {
-			headers.Authorization = `Bearer ${this._publicApiKey}`;
+			headers["x-api-key"] = this._publicApiKey;
 		}
 
 		const fetchOptions: RequestInit = {
-			method: "GET",
+			method: "POST",
 			...options,
 			headers,
 		};

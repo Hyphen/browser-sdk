@@ -628,53 +628,63 @@ describe("Hyphen sdk", () => {
 			);
 		});
 
-		test("should successfully make GET request to mockhttp.org", async () => {
+		test("should successfully make POST request to mockhttp.org", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
 			interface MockHttpResponse {
 				method: string;
 				headers: Record<string, string>;
-				queryParams: Record<string, string>;
+				body: Record<string, unknown>;
 			}
 
-			const result = await toggle.fetch<MockHttpResponse>("/get");
-			expect(result.method).toBe("GET");
+			const result = await toggle.fetch<MockHttpResponse>("/post", {
+				body: JSON.stringify({ test: "data" }),
+			});
+			expect(result.method).toBe("POST");
 			expect(result.headers).toBeDefined();
-			expect(result.queryParams).toBeDefined();
+			expect(result.body).toBeDefined();
 		});
 
 		test("should handle 404 error response from mockhttp.org", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			await expect(toggle.fetch("/status/404")).rejects.toThrow("HTTP 404");
+			await expect(
+				toggle.fetch("/status/404", {
+					body: JSON.stringify({ test: "error" }),
+				}),
+			).rejects.toThrow("HTTP 404");
 		});
 
 		test("should handle 500 error response from mockhttp.org", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			await expect(toggle.fetch("/status/500")).rejects.toThrow("HTTP 500");
+			await expect(
+				toggle.fetch("/status/500", {
+					body: JSON.stringify({ test: "error" }),
+				}),
+			).rejects.toThrow("HTTP 500");
 		});
 
-		test("should return typed JSON response with query parameters", async () => {
+		test("should return typed JSON response with request body", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			interface MockHttpGetResponse {
+			interface MockHttpPostResponse {
 				method: string;
-				queryParams: {
+				body: {
 					test: string;
-					number: string;
+					number: number;
 				};
 			}
 
-			const result = await toggle.fetch<MockHttpGetResponse>(
-				"/get?test=hello&number=42",
-			);
-			expect(result.method).toBe("GET");
-			expect(result.queryParams.test).toBe("hello");
-			expect(result.queryParams.number).toBe("42");
+			const result = await toggle.fetch<MockHttpPostResponse>("/post", {
+				body: JSON.stringify({ test: "hello", number: 42 }),
+			});
+			expect(result.method).toBe("POST");
+			expect(result.body.test).toBe("hello");
+			expect(result.body.number).toBe(42);
 		});
 
-		test("should include Authorization header when publicApiKey is set", async () => {
+		test("should include x-api-key header when publicApiKey is set", async () => {
 			const toggle = new Toggle({
 				publicApiKey: "public_test-key",
 				horizonUrls: [baseMockUrl],
@@ -685,9 +695,11 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.fetch<MockHttpResponse>("/get");
-			expect(result.method).toBe("GET");
-			expect(result.headers.authorization).toBe("Bearer public_test-key");
+			const result = await toggle.fetch<MockHttpResponse>("/post", {
+				body: JSON.stringify({ test: "auth" }),
+			});
+			expect(result.method).toBe("POST");
+			expect(result.headers["x-api-key"]).toBe("public_test-key");
 		});
 
 		test("should include custom headers in request", async () => {
@@ -698,25 +710,30 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.fetch<MockHttpResponse>("/get", {
+			const result = await toggle.fetch<MockHttpResponse>("/post", {
 				headers: { "X-Custom-Header": "test-value" },
+				body: JSON.stringify({ test: "custom" }),
 			});
 
-			expect(result.method).toBe("GET");
+			expect(result.method).toBe("POST");
 			expect(result.headers["x-custom-header"]).toBe("test-value");
 		});
 
 		test("should work with path without leading slash", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			const result = await toggle.fetch("get");
+			const result = await toggle.fetch("post", {
+				body: JSON.stringify({ test: "data" }),
+			});
 			expect(result).toBeDefined();
 		});
 
 		test("should work with path with leading slash", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			const result = await toggle.fetch("/get");
+			const result = await toggle.fetch("/post", {
+				body: JSON.stringify({ test: "data" }),
+			});
 			expect(result).toBeDefined();
 		});
 
@@ -728,7 +745,9 @@ describe("Hyphen sdk", () => {
 				],
 			});
 
-			const result = await toggle.fetch("/get");
+			const result = await toggle.fetch("/post", {
+				body: JSON.stringify({ test: "data" }),
+			});
 			expect(result).toBeDefined();
 		});
 
@@ -748,7 +767,9 @@ describe("Hyphen sdk", () => {
 		test("should handle URLs with trailing slashes correctly", async () => {
 			const toggle = new Toggle({ horizonUrls: [`${baseMockUrl}/`] });
 
-			const result = await toggle.fetch("/get");
+			const result = await toggle.fetch("/post", {
+				body: JSON.stringify({ test: "data" }),
+			});
 			expect(result).toBeDefined();
 		});
 
@@ -763,11 +784,12 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.fetch<MockHttpResponse>("/get", {
+			const result = await toggle.fetch<MockHttpResponse>("/post", {
 				headers: headers,
+				body: JSON.stringify({ test: "headers" }),
 			});
 
-			expect(result.method).toBe("GET");
+			expect(result.method).toBe("POST");
 			expect(result.headers["x-test-header"]).toBe("headers-object-value");
 		});
 
@@ -779,14 +801,15 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.fetch<MockHttpResponse>("/get", {
+			const result = await toggle.fetch<MockHttpResponse>("/post", {
 				headers: [
 					["X-Array-Header", "array-value"],
 					["X-Another-Header", "another-value"],
 				],
+				body: JSON.stringify({ test: "array" }),
 			});
 
-			expect(result.method).toBe("GET");
+			expect(result.method).toBe("POST");
 			expect(result.headers["x-array-header"]).toBe("array-value");
 			expect(result.headers["x-another-header"]).toBe("another-value");
 		});
