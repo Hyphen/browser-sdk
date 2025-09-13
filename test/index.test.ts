@@ -272,6 +272,151 @@ describe("Hyphen sdk", () => {
 		});
 	});
 
+	describe("horizonUrls property", () => {
+		test("should return empty array by default", () => {
+			const toggle = new Toggle();
+			expect(toggle.horizonUrls).toEqual([]);
+		});
+
+		test("should be set when constructor receives horizonUrls option", () => {
+			const testUrls = [
+				"https://org1.toggle.hyphen.cloud",
+				"https://org2.toggle.hyphen.cloud",
+			];
+			const toggle = new Toggle({ horizonUrls: testUrls });
+			expect(toggle.horizonUrls).toEqual(testUrls);
+		});
+
+		test("should remain empty when constructor receives no horizonUrls", () => {
+			const toggle = new Toggle({ publicApiKey: "public_test-key" });
+			expect(toggle.horizonUrls).toEqual(["https://toggle.hyphen.cloud"]);
+		});
+
+		test("should allow getting the horizonUrls property", () => {
+			const toggle = new Toggle();
+			const urls = toggle.horizonUrls;
+			expect(urls).toEqual([]);
+			expect(Array.isArray(urls)).toBe(true);
+		});
+
+		test("should allow setting the horizonUrls property", () => {
+			const toggle = new Toggle();
+			const testUrls = ["https://test.toggle.hyphen.cloud"];
+			toggle.horizonUrls = testUrls;
+			expect(toggle.horizonUrls).toEqual(testUrls);
+		});
+
+		test("should allow setting horizonUrls to empty array", () => {
+			const toggle = new Toggle();
+			const testUrls = ["https://test.toggle.hyphen.cloud"];
+			toggle.horizonUrls = testUrls;
+			toggle.horizonUrls = [];
+			expect(toggle.horizonUrls).toEqual([]);
+		});
+
+		test("should maintain the same horizonUrls array when accessed multiple times", () => {
+			const toggle = new Toggle();
+			const testUrls = [
+				"https://endpoint1.hyphen.cloud",
+				"https://endpoint2.hyphen.cloud",
+			];
+			toggle.horizonUrls = testUrls;
+			const urls1 = toggle.horizonUrls;
+			const urls2 = toggle.horizonUrls;
+			expect(urls1).toBe(urls2);
+			expect(urls1).toEqual(testUrls);
+		});
+
+		test("should update horizonUrls property when set to a new array", () => {
+			const toggle = new Toggle();
+			const originalUrls = ["https://original.hyphen.cloud"];
+			const newUrls = [
+				"https://new1.hyphen.cloud",
+				"https://new2.hyphen.cloud",
+			];
+			toggle.horizonUrls = originalUrls;
+			expect(toggle.horizonUrls).toEqual(originalUrls);
+			toggle.horizonUrls = newUrls;
+			expect(toggle.horizonUrls).toEqual(newUrls);
+			expect(toggle.horizonUrls).not.toEqual(originalUrls);
+		});
+
+		test("should handle single URL in array", () => {
+			const toggle = new Toggle();
+			const singleUrl = ["https://single.toggle.hyphen.cloud"];
+			toggle.horizonUrls = singleUrl;
+			expect(toggle.horizonUrls).toEqual(singleUrl);
+			expect(toggle.horizonUrls.length).toBe(1);
+		});
+
+		test("should handle multiple URLs with different formats", () => {
+			const toggle = new Toggle();
+			const mixedUrls = [
+				"https://prod.toggle.hyphen.cloud",
+				"http://staging.toggle.hyphen.cloud",
+				"https://org-123.toggle.hyphen.cloud",
+				"https://api.custom-domain.com/toggle",
+			];
+			toggle.horizonUrls = mixedUrls;
+			expect(toggle.horizonUrls).toEqual(mixedUrls);
+			expect(toggle.horizonUrls.length).toBe(4);
+		});
+
+		test("should handle very large URL array", () => {
+			const toggle = new Toggle();
+			const largeUrlArray = Array.from(
+				{ length: 100 },
+				(_, i) => `https://endpoint-${i}.toggle.hyphen.cloud`,
+			);
+			toggle.horizonUrls = largeUrlArray;
+			expect(toggle.horizonUrls).toEqual(largeUrlArray);
+			expect(toggle.horizonUrls.length).toBe(100);
+		});
+
+		test("should not interfere with other properties", () => {
+			const toggle = new Toggle();
+			const testUrls = ["https://test.hyphen.cloud"];
+			const testContext = getRandomToggleContext();
+			const testOrgId = "test-org";
+
+			toggle.horizonUrls = testUrls;
+			toggle.defaultContext = testContext;
+			toggle.organizationId = testOrgId;
+
+			expect(toggle.horizonUrls).toEqual(testUrls);
+			expect(toggle.defaultContext).toBe(testContext);
+			expect(toggle.organizationId).toBe(testOrgId);
+		});
+
+		test("should work with constructor containing all options", () => {
+			const testUrls = [
+				"https://primary.toggle.hyphen.cloud",
+				"https://secondary.toggle.hyphen.cloud",
+			];
+			const testContext = getRandomToggleContext();
+			const toggle = new Toggle({
+				publicApiKey: "public_test-comprehensive-key",
+				defaultContext: testContext,
+				horizonUrls: testUrls,
+			});
+
+			expect(toggle.horizonUrls).toEqual(testUrls);
+			expect(toggle.defaultContext).toBe(testContext);
+			expect(toggle.publicApiKey).toBe("public_test-comprehensive-key");
+		});
+
+		test("should handle URLs with query parameters and paths", () => {
+			const toggle = new Toggle();
+			const complexUrls = [
+				"https://api.hyphen.cloud/v1/toggle?version=latest",
+				"https://cdn.hyphen.cloud/toggle/endpoint",
+				"https://backup.hyphen.cloud:8443/api/toggle",
+			];
+			toggle.horizonUrls = complexUrls;
+			expect(toggle.horizonUrls).toEqual(complexUrls);
+		});
+	});
+
 	describe("organizationId property", () => {
 		test("should return undefined by default", () => {
 			const toggle = new Toggle();
@@ -490,21 +635,21 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle();
 			const orgId = "test-org";
 			const validKey = `public_${Buffer.from(`${orgId}:some-secret`).toString("base64")}`;
-			expect(toggle.buildDefaultHorizonUrl(validKey)).toBe(
+			expect(toggle.getDefaultHorizonUrl(validKey)).toBe(
 				`https://${orgId}.toggle.hyphen.cloud`,
 			);
 		});
 
 		test("should return default URL when org ID cannot be extracted", () => {
 			const toggle = new Toggle();
-			expect(toggle.buildDefaultHorizonUrl("invalid-key")).toBe(
+			expect(toggle.getDefaultHorizonUrl("invalid-key")).toBe(
 				"https://toggle.hyphen.cloud",
 			);
 		});
 
 		test("should return default URL for malformed base64", () => {
 			const toggle = new Toggle();
-			expect(toggle.buildDefaultHorizonUrl("public_invalid-base64!")).toBe(
+			expect(toggle.getDefaultHorizonUrl("public_invalid-base64!")).toBe(
 				"https://toggle.hyphen.cloud",
 			);
 		});
@@ -513,7 +658,7 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle();
 			const orgId = "my-org-123_test";
 			const validKey = `public_${Buffer.from(`${orgId}:secret-data`).toString("base64")}`;
-			expect(toggle.buildDefaultHorizonUrl(validKey)).toBe(
+			expect(toggle.getDefaultHorizonUrl(validKey)).toBe(
 				`https://${orgId}.toggle.hyphen.cloud`,
 			);
 		});
@@ -522,7 +667,7 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle();
 			const invalidOrgId = "org@invalid#chars";
 			const invalidKey = `public_${Buffer.from(`${invalidOrgId}:data`).toString("base64")}`;
-			expect(toggle.buildDefaultHorizonUrl(invalidKey)).toBe(
+			expect(toggle.getDefaultHorizonUrl(invalidKey)).toBe(
 				"https://toggle.hyphen.cloud",
 			);
 		});
@@ -530,7 +675,7 @@ describe("Hyphen sdk", () => {
 		test("should return default URL for empty org ID", () => {
 			const toggle = new Toggle();
 			const emptyOrgKey = `public_${Buffer.from(":secret-data").toString("base64")}`;
-			expect(toggle.buildDefaultHorizonUrl(emptyOrgKey)).toBe(
+			expect(toggle.getDefaultHorizonUrl(emptyOrgKey)).toBe(
 				"https://toggle.hyphen.cloud",
 			);
 		});
@@ -539,7 +684,7 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle();
 			const numericOrgId = "123456";
 			const numericKey = `public_${Buffer.from(`${numericOrgId}:data`).toString("base64")}`;
-			expect(toggle.buildDefaultHorizonUrl(numericKey)).toBe(
+			expect(toggle.getDefaultHorizonUrl(numericKey)).toBe(
 				`https://${numericOrgId}.toggle.hyphen.cloud`,
 			);
 		});
@@ -548,28 +693,28 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle();
 			const singleCharOrgId = "a";
 			const singleCharKey = `public_${Buffer.from(`${singleCharOrgId}:data`).toString("base64")}`;
-			expect(toggle.buildDefaultHorizonUrl(singleCharKey)).toBe(
+			expect(toggle.getDefaultHorizonUrl(singleCharKey)).toBe(
 				`https://${singleCharOrgId}.toggle.hyphen.cloud`,
 			);
 		});
 
 		test("should return default URL for null input", () => {
 			const toggle = new Toggle();
-			expect(toggle.buildDefaultHorizonUrl(null as unknown as string)).toBe(
+			expect(toggle.getDefaultHorizonUrl(null as unknown as string)).toBe(
 				"https://toggle.hyphen.cloud",
 			);
 		});
 
 		test("should return default URL for undefined input", () => {
 			const toggle = new Toggle();
-			expect(
-				toggle.buildDefaultHorizonUrl(undefined as unknown as string),
-			).toBe("https://toggle.hyphen.cloud");
+			expect(toggle.getDefaultHorizonUrl(undefined as unknown as string)).toBe(
+				"https://toggle.hyphen.cloud",
+			);
 		});
 
 		test("should return default URL for empty string", () => {
 			const toggle = new Toggle();
-			expect(toggle.buildDefaultHorizonUrl("")).toBe(
+			expect(toggle.getDefaultHorizonUrl("")).toBe(
 				"https://toggle.hyphen.cloud",
 			);
 		});
@@ -580,7 +725,7 @@ describe("Hyphen sdk", () => {
 			const keyWithoutPrefix = Buffer.from(`${orgId}:secret-data`).toString(
 				"base64",
 			);
-			expect(toggle.buildDefaultHorizonUrl(keyWithoutPrefix)).toBe(
+			expect(toggle.getDefaultHorizonUrl(keyWithoutPrefix)).toBe(
 				`https://${orgId}.toggle.hyphen.cloud`,
 			);
 		});
