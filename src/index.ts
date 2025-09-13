@@ -1,6 +1,8 @@
 import { Hookified } from "hookified";
 import type { ToggleContext } from "./toggle-context.js";
 
+export type { ToggleContext } from "./toggle-context.js";
+
 export type ToggleOptions = {
 	/**
 	 * public api key
@@ -141,6 +143,95 @@ export class Toggle extends Hookified {
 	}
 
 	/**
+	 * Makes an HTTP GET request to the specified URL with automatic authentication.
+	 *
+	 * This method uses browser-compatible fetch and automatically includes the
+	 * public API key in the Authorization header if available. It supports load
+	 * balancing across multiple horizon URLs with fallback behavior.
+	 *
+	 * @template T - The expected response type
+	 * @param path - The API path to request (e.g., '/api/toggles')
+	 * @param options - Optional fetch configuration
+	 * @returns Promise resolving to the parsed JSON response
+	 * @throws {Error} If no horizon URLs are configured or all requests fail
+	 *
+	 * @example
+	 * ```typescript
+	 * const toggle = new Toggle({
+	 *   publicApiKey: 'public_your-key-here',
+	 *   horizonUrls: ['https://api.hyphen.cloud']
+	 * });
+	 *
+	 * interface ToggleResponse {
+	 *   enabled: boolean;
+	 *   value: string;
+	 * }
+	 *
+	 * const result = await toggle.get<ToggleResponse>('/api/toggle/feature-flag');
+	 * console.log(result.enabled); // true/false
+	 * ```
+	 */
+	public async get<T>(path: string, options?: RequestInit): Promise<T> {
+		if (this._horizonUrls.length === 0) {
+			throw new Error(
+				"No horizon URLs configured. Set horizonUrls or provide a valid publicApiKey.",
+			);
+		}
+
+		const headers: Record<string, string> = {
+			"Content-Type": "application/json",
+		};
+
+		if (options?.headers) {
+			if (options.headers instanceof Headers) {
+				options.headers.forEach((value, key) => {
+					headers[key] = value;
+				});
+			} else if (Array.isArray(options.headers)) {
+				options.headers.forEach(([key, value]) => {
+					headers[key] = value;
+				});
+			} else {
+				Object.assign(headers, options.headers);
+			}
+		}
+
+		if (this._publicApiKey) {
+			headers.Authorization = `Bearer ${this._publicApiKey}`;
+		}
+
+		const fetchOptions: RequestInit = {
+			method: "GET",
+			...options,
+			headers,
+		};
+
+		const errors: Error[] = [];
+
+		for (const baseUrl of this._horizonUrls) {
+			try {
+				const url = `${baseUrl.replace(/\/$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
+				const response = await fetch(url, fetchOptions);
+
+				if (!response.ok) {
+					throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+				}
+
+				const data = (await response.json()) as T;
+				return data;
+			} catch (error) {
+				const fetchError =
+					error instanceof Error ? error : new Error("Unknown fetch error");
+				errors.push(fetchError);
+			}
+		}
+
+		throw new Error(
+			`All horizon URLs failed. Last errors: ${errors.map((e) => e.message).join(", ")}`,
+		);
+	}
+
+	/**
 	 * Validates and sets the public API key. This is used internally
 	 *
 	 * @param key - The public API key string or undefined to clear
@@ -173,7 +264,9 @@ export class Toggle extends Hookified {
 	public getOrgIdFromPublicKey(publicKey: string): string | undefined {
 		try {
 			const keyWithoutPrefix = publicKey.replace(/^public_/, "");
-			const decoded = Buffer.from(keyWithoutPrefix, "base64").toString();
+			const decoded = globalThis.atob
+				? globalThis.atob(keyWithoutPrefix)
+				: Buffer.from(keyWithoutPrefix, "base64").toString();
 			const [orgId] = decoded.split(":");
 			const isValidOrgId = /^[a-zA-Z0-9_-]+$/.test(orgId);
 			return isValidOrgId ? orgId : undefined;
