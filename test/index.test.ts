@@ -1,6 +1,9 @@
+import process from "node:process";
 import { describe, expect, test } from "vitest";
 import { Toggle, type ToggleOptions } from "../src/index.js";
 import { getRandomToggleContext, mockToggleContexts } from "./mock-contexts.js";
+
+const baseMockUrl = process.env.BASE_MOCK_URL ?? "https://mockhttp.org";
 
 describe("Hyphen sdk", () => {
 	test("should create an instance of Toggle", () => {
@@ -589,6 +592,146 @@ describe("Hyphen sdk", () => {
 		test("should handle edge case with only public_ prefix", () => {
 			const toggle = new Toggle();
 			expect(toggle.getOrgIdFromPublicKey("public_")).toBeUndefined();
+		});
+	});
+
+	describe("get method", () => {
+		test("should throw error when no horizon URLs are configured", async () => {
+			const toggle = new Toggle();
+			await expect(toggle.get("/api/test")).rejects.toThrow(
+				"No horizon URLs configured. Set horizonUrls or provide a valid publicApiKey.",
+			);
+		});
+
+		test("should throw error when horizon URLs array is empty", async () => {
+			const toggle = new Toggle({ horizonUrls: [] });
+			await expect(toggle.get("/api/test")).rejects.toThrow(
+				"No horizon URLs configured. Set horizonUrls or provide a valid publicApiKey.",
+			);
+		});
+
+		test("should successfully make GET request to mockhttp.org", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			interface MockHttpResponse {
+				method: string;
+				headers: Record<string, string>;
+				queryParams: Record<string, string>;
+			}
+
+			const result = await toggle.get<MockHttpResponse>("/get");
+			expect(result.method).toBe("GET");
+			expect(result.headers).toBeDefined();
+			expect(result.queryParams).toBeDefined();
+		});
+
+		test("should handle 404 error response from mockhttp.org", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			await expect(toggle.get("/status/404")).rejects.toThrow("HTTP 404");
+		});
+
+		test("should handle 500 error response from mockhttp.org", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			await expect(toggle.get("/status/500")).rejects.toThrow("HTTP 500");
+		});
+
+		test("should return typed JSON response with query parameters", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			interface MockHttpGetResponse {
+				method: string;
+				queryParams: {
+					test: string;
+					number: string;
+				};
+			}
+
+			const result = await toggle.get<MockHttpGetResponse>(
+				"/get?test=hello&number=42",
+			);
+			expect(result.method).toBe("GET");
+			expect(result.queryParams.test).toBe("hello");
+			expect(result.queryParams.number).toBe("42");
+		});
+
+		test("should include Authorization header when publicApiKey is set", async () => {
+			const toggle = new Toggle({
+				publicApiKey: "public_test-key",
+				horizonUrls: [baseMockUrl],
+			});
+
+			interface MockHttpResponse {
+				method: string;
+				headers: Record<string, string>;
+			}
+
+			const result = await toggle.get<MockHttpResponse>("/get");
+			expect(result.method).toBe("GET");
+			expect(result.headers.authorization).toBe("Bearer public_test-key");
+		});
+
+		test("should include custom headers in request", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			interface MockHttpResponse {
+				method: string;
+				headers: Record<string, string>;
+			}
+
+			const result = await toggle.get<MockHttpResponse>("/get", {
+				headers: { "X-Custom-Header": "test-value" },
+			});
+
+			expect(result.method).toBe("GET");
+			expect(result.headers["x-custom-header"]).toBe("test-value");
+		});
+
+		test("should work with path without leading slash", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			const result = await toggle.get("get");
+			expect(result).toBeDefined();
+		});
+
+		test("should work with path with leading slash", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			const result = await toggle.get("/get");
+			expect(result).toBeDefined();
+		});
+
+		test("should try multiple horizon URLs on failure", async () => {
+			const toggle = new Toggle({
+				horizonUrls: [
+					"https://invalid-url-that-should-fail.example",
+					baseMockUrl,
+				],
+			});
+
+			const result = await toggle.get("/get");
+			expect(result).toBeDefined();
+		});
+
+		test("should fail when all horizon URLs are invalid", async () => {
+			const toggle = new Toggle({
+				horizonUrls: [
+					"https://invalid-url-1.example",
+					"https://invalid-url-2.example",
+				],
+			});
+
+			await expect(toggle.get("/test")).rejects.toThrow(
+				"All horizon URLs failed",
+			);
+		});
+
+		test("should handle URLs with trailing slashes correctly", async () => {
+			const toggle = new Toggle({ horizonUrls: ["https://httpbin.org/"] });
+
+			const result = await toggle.get("/get");
+			expect(result).toBeDefined();
 		});
 	});
 
