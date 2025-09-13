@@ -197,7 +197,7 @@ export class Toggle extends Hookified {
 		}
 
 		if (this._publicApiKey) {
-			headers["Authorization"] = `Bearer ${this._publicApiKey}`;
+			headers.Authorization = `Bearer ${this._publicApiKey}`;
 		}
 
 		const fetchOptions: RequestInit = {

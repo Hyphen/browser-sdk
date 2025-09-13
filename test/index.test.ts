@@ -593,6 +593,24 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle();
 			expect(toggle.getOrgIdFromPublicKey("public_")).toBeUndefined();
 		});
+
+		test("should use Buffer fallback when atob is not available", () => {
+			const toggle = new Toggle();
+			const orgId = "fallback-org";
+			const validKey = `public_${Buffer.from(`${orgId}:some-secret`).toString("base64")}`;
+
+			// Temporarily remove atob to force Buffer fallback
+			const originalAtob = globalThis.atob;
+			// @ts-expect-error - Intentionally setting to undefined for testing
+			globalThis.atob = undefined;
+
+			try {
+				expect(toggle.getOrgIdFromPublicKey(validKey)).toBe(orgId);
+			} finally {
+				// Restore original atob
+				globalThis.atob = originalAtob;
+			}
+		});
 	});
 
 	describe("get method", () => {
@@ -728,10 +746,70 @@ describe("Hyphen sdk", () => {
 		});
 
 		test("should handle URLs with trailing slashes correctly", async () => {
-			const toggle = new Toggle({ horizonUrls: ["https://httpbin.org/"] });
+			const toggle = new Toggle({ horizonUrls: [`${baseMockUrl}/`] });
 
 			const result = await toggle.get("/get");
 			expect(result).toBeDefined();
+		});
+
+		test("should handle Headers object in request options", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			const headers = new Headers();
+			headers.set("X-Test-Header", "headers-object-value");
+
+			interface MockHttpResponse {
+				method: string;
+				headers: Record<string, string>;
+			}
+
+			const result = await toggle.get<MockHttpResponse>("/get", {
+				headers: headers,
+			});
+
+			expect(result.method).toBe("GET");
+			expect(result.headers["x-test-header"]).toBe("headers-object-value");
+		});
+
+		test("should handle array headers in request options", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			interface MockHttpResponse {
+				method: string;
+				headers: Record<string, string>;
+			}
+
+			const result = await toggle.get<MockHttpResponse>("/get", {
+				headers: [
+					["X-Array-Header", "array-value"],
+					["X-Another-Header", "another-value"],
+				],
+			});
+
+			expect(result.method).toBe("GET");
+			expect(result.headers["x-array-header"]).toBe("array-value");
+			expect(result.headers["x-another-header"]).toBe("another-value");
+		});
+
+		test("should handle non-Error exceptions in get method", async () => {
+			const toggle = new Toggle({
+				horizonUrls: ["https://invalid-domain-that-does-not-exist.test"],
+			});
+
+			// Mock fetch to throw a non-Error value
+			const originalFetch = global.fetch;
+			global.fetch = (() => {
+				throw "string error"; // Non-Error exception
+			}) as typeof fetch;
+
+			try {
+				await expect(toggle.get("/test")).rejects.toThrow(
+					"All horizon URLs failed",
+				);
+			} finally {
+				// Restore original fetch
+				global.fetch = originalFetch;
+			}
 		});
 	});
 
