@@ -121,6 +121,23 @@ export class Toggle extends Hookified {
 		this._publicApiKey = key;
 	}
 
+	/**
+	 * Extracts the organization ID from a public API key.
+	 * 
+	 * The public key format is: `public_<base64-encoded-data>`
+	 * The base64 data contains: `orgId:secretData`
+	 * Only alphanumeric characters, underscores, and hyphens are considered valid in org IDs.
+	 *
+	 * @param publicKey - The public API key to extract the organization ID from
+	 * @returns The organization ID if valid and extractable, undefined otherwise
+	 * 
+	 * @example
+	 * ```typescript
+	 * const toggle = new Toggle();
+	 * const orgId = toggle.getOrgIdFromPublicKey('public_dGVzdC1vcmc6c2VjcmV0');
+	 * console.log(orgId); // 'test-org'
+	 * ```
+	 */
 	public getOrgIdFromPublicKey(publicKey: string): string | undefined {
 		try {
 			const keyWithoutPrefix = publicKey.replace(/^public_/, "");
@@ -133,6 +150,28 @@ export class Toggle extends Hookified {
 		}
 	}
 
+	/**
+	 * Builds the default Horizon API URL for the given public key.
+	 * 
+	 * If a valid organization ID can be extracted from the public key, returns an
+	 * organization-specific URL. Otherwise, returns the default fallback URL.
+	 *
+	 * @param publicKey - The public API key to build the URL for
+	 * @returns Organization-specific URL or default fallback URL
+	 * 
+	 * @example
+	 * ```typescript
+	 * const toggle = new Toggle();
+	 * 
+	 * // With valid org ID
+	 * const orgUrl = toggle.buildDefaultHorizonUrl('public_dGVzdC1vcmc6c2VjcmV0');
+	 * console.log(orgUrl); // 'https://test-org.toggle.hyphen.cloud'
+	 * 
+	 * // With invalid key
+	 * const defaultUrl = toggle.buildDefaultHorizonUrl('invalid-key');
+	 * console.log(defaultUrl); // 'https://toggle.hyphen.cloud'
+	 * ```
+	 */
 	public buildDefaultHorizonUrl(publicKey: string): string {
 		const orgId = this.getOrgIdFromPublicKey(publicKey);
 		return orgId
