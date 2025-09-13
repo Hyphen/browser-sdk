@@ -143,7 +143,7 @@ export class Toggle extends Hookified {
 	}
 
 	/**
-	 * Makes an HTTP GET request to the specified URL with automatic authentication.
+	 * Makes an HTTP request to the specified URL with automatic authentication.
 	 *
 	 * This method uses browser-compatible fetch and automatically includes the
 	 * public API key in the Authorization header if available. It supports load
@@ -167,11 +167,11 @@ export class Toggle extends Hookified {
 	 *   value: string;
 	 * }
 	 *
-	 * const result = await toggle.get<ToggleResponse>('/api/toggle/feature-flag');
+	 * const result = await toggle.fetch<ToggleResponse>('/api/toggle/feature-flag');
 	 * console.log(result.enabled); // true/false
 	 * ```
 	 */
-	public async get<T>(path: string, options?: RequestInit): Promise<T> {
+	public async fetch<T>(path: string, options?: RequestInit): Promise<T> {
 		if (this._horizonUrls.length === 0) {
 			throw new Error(
 				"No horizon URLs configured. Set horizonUrls or provide a valid publicApiKey.",
