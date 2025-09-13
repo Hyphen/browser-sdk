@@ -45,6 +45,10 @@ export class Toggle extends Hookified {
 
 		if (options?.horizonUrls) {
 			this._horizonUrls = options.horizonUrls;
+		} else {
+			if (this._publicApiKey) {
+				this._horizonUrls = [this.getDefaultHorizonUrl(this._publicApiKey)];
+			}
 		}
 	}
 
@@ -220,7 +224,7 @@ export class Toggle extends Hookified {
 	 * console.log(defaultUrl); // 'https://toggle.hyphen.cloud'
 	 * ```
 	 */
-	public buildDefaultHorizonUrl(publicKey: string): string {
+	public getDefaultHorizonUrl(publicKey: string): string {
 		const orgId = this.getOrgIdFromPublicKey(publicKey);
 		return orgId
 			? `https://${orgId}.toggle.hyphen.cloud`
