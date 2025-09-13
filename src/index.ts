@@ -20,6 +20,7 @@ export class Toggle extends Hookified {
 	private _defaultContext: ToggleContext = {
 		targetingKey: "",
 	};
+	private _organizationId: string | undefined;
 
 	constructor(options?: ToggleOptions) {
 		super();
@@ -30,6 +31,7 @@ export class Toggle extends Hookified {
 
 		if (options?.publicApiKey) {
 			this._publicApiKey = options.publicApiKey;
+			this._organizationId = this.getOrgIdFromPublicKey(this._publicApiKey);
 		}
 	}
 
@@ -86,6 +88,24 @@ export class Toggle extends Hookified {
 	 */
 	public set defaultContext(value: ToggleContext) {
 		this._defaultContext = value;
+	}
+
+	/**
+	 * Gets the organization ID extracted from the public API key.
+	 *
+	 * @returns The organization ID string or undefined if not available
+	 */
+	public get organizationId(): string | undefined {
+		return this._organizationId;
+	}
+
+	/**
+	 * Sets the organization ID.
+	 *
+	 * @param value - The organization ID string or undefined to clear
+	 */
+	public set organizationId(value: string | undefined) {
+		this._organizationId = value;
 	}
 
 	/**
