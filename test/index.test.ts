@@ -299,4 +299,218 @@ describe("Hyphen sdk", () => {
 			);
 		});
 	});
+
+	describe("getOrgIdFromPublicKey", () => {
+		test("should extract org ID from valid public key", () => {
+			const toggle = new Toggle();
+			const orgId = "test-org";
+			const validKey = `public_${Buffer.from(`${orgId}:some-secret`).toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(validKey)).toBe(orgId);
+		});
+
+		test("should handle public key without prefix", () => {
+			const toggle = new Toggle();
+			const orgId = "org-without-prefix";
+			const keyWithoutPrefix = Buffer.from(`${orgId}:secret-data`).toString(
+				"base64",
+			);
+			expect(toggle.getOrgIdFromPublicKey(keyWithoutPrefix)).toBe(orgId);
+		});
+
+		test("should return undefined for malformed base64", () => {
+			const toggle = new Toggle();
+			expect(
+				toggle.getOrgIdFromPublicKey("public_invalid-base64!"),
+			).toBeUndefined();
+		});
+
+		test("should return undefined for empty decoded content", () => {
+			const toggle = new Toggle();
+			const emptyKey = `public_${Buffer.from("").toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(emptyKey)).toBeUndefined();
+		});
+
+		test("should return undefined for decoded content without colon", () => {
+			const toggle = new Toggle();
+			const keyWithoutColon = `public_${Buffer.from("orgidwithoutcolon").toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(keyWithoutColon)).toBe(
+				"orgidwithoutcolon",
+			);
+		});
+
+		test("should handle org ID with valid characters", () => {
+			const toggle = new Toggle();
+			const orgId = "valid_org-123";
+			const validKey = `public_${Buffer.from(`${orgId}:data`).toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(validKey)).toBe(orgId);
+		});
+
+		test("should return undefined for org ID with invalid characters", () => {
+			const toggle = new Toggle();
+			const invalidOrgId = "org@invalid#chars";
+			const invalidKey = `public_${Buffer.from(`${invalidOrgId}:data`).toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(invalidKey)).toBeUndefined();
+		});
+
+		test("should handle org ID with spaces (invalid)", () => {
+			const toggle = new Toggle();
+			const orgIdWithSpaces = "org with spaces";
+			const keyWithSpaces = `public_${Buffer.from(`${orgIdWithSpaces}:data`).toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(keyWithSpaces)).toBeUndefined();
+		});
+
+		test("should handle multiple colons in decoded content", () => {
+			const toggle = new Toggle();
+			const orgId = "multi-colon-org";
+			const keyWithMultipleColons = `public_${Buffer.from(`${orgId}:secret:extra:data`).toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(keyWithMultipleColons)).toBe(orgId);
+		});
+
+		test("should handle empty org ID", () => {
+			const toggle = new Toggle();
+			const emptyOrgKey = `public_${Buffer.from(":secret-data").toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(emptyOrgKey)).toBeUndefined();
+		});
+
+		test("should handle numeric org ID", () => {
+			const toggle = new Toggle();
+			const numericOrgId = "123456";
+			const numericKey = `public_${Buffer.from(`${numericOrgId}:data`).toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(numericKey)).toBe(numericOrgId);
+		});
+
+		test("should handle very long org ID", () => {
+			const toggle = new Toggle();
+			const longOrgId = "a".repeat(100);
+			const longKey = `public_${Buffer.from(`${longOrgId}:data`).toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(longKey)).toBe(longOrgId);
+		});
+
+		test("should handle single character org ID", () => {
+			const toggle = new Toggle();
+			const singleCharOrgId = "a";
+			const singleCharKey = `public_${Buffer.from(`${singleCharOrgId}:data`).toString("base64")}`;
+			expect(toggle.getOrgIdFromPublicKey(singleCharKey)).toBe(singleCharOrgId);
+		});
+
+		test("should return undefined for null input", () => {
+			const toggle = new Toggle();
+			expect(() =>
+				toggle.getOrgIdFromPublicKey(null as unknown as string),
+			).not.toThrow();
+		});
+
+		test("should return undefined for undefined input", () => {
+			const toggle = new Toggle();
+			expect(() =>
+				toggle.getOrgIdFromPublicKey(undefined as unknown as string),
+			).not.toThrow();
+		});
+
+		test("should handle edge case with only public_ prefix", () => {
+			const toggle = new Toggle();
+			expect(toggle.getOrgIdFromPublicKey("public_")).toBeUndefined();
+		});
+	});
+
+	describe("buildDefaultHorizonUrl", () => {
+		test("should build URL with org ID from valid public key", () => {
+			const toggle = new Toggle();
+			const orgId = "test-org";
+			const validKey = `public_${Buffer.from(`${orgId}:some-secret`).toString("base64")}`;
+			expect(toggle.buildDefaultHorizonUrl(validKey)).toBe(
+				`https://${orgId}.toggle.hyphen.cloud`,
+			);
+		});
+
+		test("should return default URL when org ID cannot be extracted", () => {
+			const toggle = new Toggle();
+			expect(toggle.buildDefaultHorizonUrl("invalid-key")).toBe(
+				"https://toggle.hyphen.cloud",
+			);
+		});
+
+		test("should return default URL for malformed base64", () => {
+			const toggle = new Toggle();
+			expect(toggle.buildDefaultHorizonUrl("public_invalid-base64!")).toBe(
+				"https://toggle.hyphen.cloud",
+			);
+		});
+
+		test("should build URL with complex org ID", () => {
+			const toggle = new Toggle();
+			const orgId = "my-org-123_test";
+			const validKey = `public_${Buffer.from(`${orgId}:secret-data`).toString("base64")}`;
+			expect(toggle.buildDefaultHorizonUrl(validKey)).toBe(
+				`https://${orgId}.toggle.hyphen.cloud`,
+			);
+		});
+
+		test("should return default URL for org ID with invalid characters", () => {
+			const toggle = new Toggle();
+			const invalidOrgId = "org@invalid#chars";
+			const invalidKey = `public_${Buffer.from(`${invalidOrgId}:data`).toString("base64")}`;
+			expect(toggle.buildDefaultHorizonUrl(invalidKey)).toBe(
+				"https://toggle.hyphen.cloud",
+			);
+		});
+
+		test("should return default URL for empty org ID", () => {
+			const toggle = new Toggle();
+			const emptyOrgKey = `public_${Buffer.from(":secret-data").toString("base64")}`;
+			expect(toggle.buildDefaultHorizonUrl(emptyOrgKey)).toBe(
+				"https://toggle.hyphen.cloud",
+			);
+		});
+
+		test("should build URL with numeric org ID", () => {
+			const toggle = new Toggle();
+			const numericOrgId = "123456";
+			const numericKey = `public_${Buffer.from(`${numericOrgId}:data`).toString("base64")}`;
+			expect(toggle.buildDefaultHorizonUrl(numericKey)).toBe(
+				`https://${numericOrgId}.toggle.hyphen.cloud`,
+			);
+		});
+
+		test("should build URL with single character org ID", () => {
+			const toggle = new Toggle();
+			const singleCharOrgId = "a";
+			const singleCharKey = `public_${Buffer.from(`${singleCharOrgId}:data`).toString("base64")}`;
+			expect(toggle.buildDefaultHorizonUrl(singleCharKey)).toBe(
+				`https://${singleCharOrgId}.toggle.hyphen.cloud`,
+			);
+		});
+
+		test("should return default URL for null input", () => {
+			const toggle = new Toggle();
+			expect(toggle.buildDefaultHorizonUrl(null as unknown as string)).toBe(
+				"https://toggle.hyphen.cloud",
+			);
+		});
+
+		test("should return default URL for undefined input", () => {
+			const toggle = new Toggle();
+			expect(
+				toggle.buildDefaultHorizonUrl(undefined as unknown as string),
+			).toBe("https://toggle.hyphen.cloud");
+		});
+
+		test("should return default URL for empty string", () => {
+			const toggle = new Toggle();
+			expect(toggle.buildDefaultHorizonUrl("")).toBe(
+				"https://toggle.hyphen.cloud",
+			);
+		});
+
+		test("should handle key without prefix", () => {
+			const toggle = new Toggle();
+			const orgId = "no-prefix-org";
+			const keyWithoutPrefix = Buffer.from(`${orgId}:secret-data`).toString(
+				"base64",
+			);
+			expect(toggle.buildDefaultHorizonUrl(keyWithoutPrefix)).toBe(
+				`https://${orgId}.toggle.hyphen.cloud`,
+			);
+		});
+	});
 });
