@@ -12,6 +12,14 @@ export type ToggleOptions = {
 	 * The default context to use when once is not passed
 	 */
 	defaultContext?: ToggleContext;
+
+	/**
+	 * Horizon Endpoint Urls to use for Toggle. This will place these urls to be
+	 * load balanced. If endpoints fail it will attempt to use the default horizon
+	 * endpoint service.
+	 * @see {@link https://hyphen.ai/horizon} for more information
+	 */
+	horizonUrls?: string[];
 };
 
 export class Toggle extends Hookified {
@@ -21,6 +29,7 @@ export class Toggle extends Hookified {
 		targetingKey: "",
 	};
 	private _organizationId: string | undefined;
+	private _horizonUrls: string[] = [];
 
 	constructor(options?: ToggleOptions) {
 		super();
@@ -32,6 +41,10 @@ export class Toggle extends Hookified {
 		if (options?.publicApiKey) {
 			this._publicApiKey = options.publicApiKey;
 			this._organizationId = this.getOrgIdFromPublicKey(this._publicApiKey);
+		}
+
+		if (options?.horizonUrls) {
+			this._horizonUrls = options.horizonUrls;
 		}
 	}
 
@@ -106,6 +119,41 @@ export class Toggle extends Hookified {
 	 */
 	public set organizationId(value: string | undefined) {
 		this._organizationId = value;
+	}
+
+	/**
+	 * Gets the Horizon endpoint URLs used for load balancing.
+	 *
+	 * These URLs are used to distribute requests across multiple Horizon endpoints.
+	 * If endpoints fail, the system will attempt to use the default horizon endpoint service.
+	 *
+	 * @returns Array of Horizon endpoint URLs
+	 * @see {@link https://hyphen.ai/horizon} for more information
+	 */
+	public get horizonUrls(): string[] {
+		return this._horizonUrls;
+	}
+
+	/**
+	 * Sets the Horizon endpoint URLs for load balancing.
+	 *
+	 * Configures multiple Horizon endpoints that will be used for load balancing.
+	 * When endpoints fail, the system will fall back to the default horizon endpoint service.
+	 *
+	 * @param value - Array of Horizon endpoint URLs or empty array to clear
+	 * @see {@link https://hyphen.ai/horizon} for more information
+	 *
+	 * @example
+	 * ```typescript
+	 * const toggle = new Toggle();
+	 * toggle.horizonUrls = [
+	 *   'https://org1.toggle.hyphen.cloud',
+	 *   'https://org2.toggle.hyphen.cloud'
+	 * ];
+	 * ```
+	 */
+	public set horizonUrls(value: string[]) {
+		this._horizonUrls = value;
 	}
 
 	/**

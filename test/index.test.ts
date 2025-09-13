@@ -272,6 +272,151 @@ describe("Hyphen sdk", () => {
 		});
 	});
 
+	describe("horizonUrls property", () => {
+		test("should return empty array by default", () => {
+			const toggle = new Toggle();
+			expect(toggle.horizonUrls).toEqual([]);
+		});
+
+		test("should be set when constructor receives horizonUrls option", () => {
+			const testUrls = [
+				"https://org1.toggle.hyphen.cloud",
+				"https://org2.toggle.hyphen.cloud",
+			];
+			const toggle = new Toggle({ horizonUrls: testUrls });
+			expect(toggle.horizonUrls).toEqual(testUrls);
+		});
+
+		test("should remain empty when constructor receives no horizonUrls", () => {
+			const toggle = new Toggle({ publicApiKey: "public_test-key" });
+			expect(toggle.horizonUrls).toEqual([]);
+		});
+
+		test("should allow getting the horizonUrls property", () => {
+			const toggle = new Toggle();
+			const urls = toggle.horizonUrls;
+			expect(urls).toEqual([]);
+			expect(Array.isArray(urls)).toBe(true);
+		});
+
+		test("should allow setting the horizonUrls property", () => {
+			const toggle = new Toggle();
+			const testUrls = ["https://test.toggle.hyphen.cloud"];
+			toggle.horizonUrls = testUrls;
+			expect(toggle.horizonUrls).toEqual(testUrls);
+		});
+
+		test("should allow setting horizonUrls to empty array", () => {
+			const toggle = new Toggle();
+			const testUrls = ["https://test.toggle.hyphen.cloud"];
+			toggle.horizonUrls = testUrls;
+			toggle.horizonUrls = [];
+			expect(toggle.horizonUrls).toEqual([]);
+		});
+
+		test("should maintain the same horizonUrls array when accessed multiple times", () => {
+			const toggle = new Toggle();
+			const testUrls = [
+				"https://endpoint1.hyphen.cloud",
+				"https://endpoint2.hyphen.cloud",
+			];
+			toggle.horizonUrls = testUrls;
+			const urls1 = toggle.horizonUrls;
+			const urls2 = toggle.horizonUrls;
+			expect(urls1).toBe(urls2);
+			expect(urls1).toEqual(testUrls);
+		});
+
+		test("should update horizonUrls property when set to a new array", () => {
+			const toggle = new Toggle();
+			const originalUrls = ["https://original.hyphen.cloud"];
+			const newUrls = [
+				"https://new1.hyphen.cloud",
+				"https://new2.hyphen.cloud",
+			];
+			toggle.horizonUrls = originalUrls;
+			expect(toggle.horizonUrls).toEqual(originalUrls);
+			toggle.horizonUrls = newUrls;
+			expect(toggle.horizonUrls).toEqual(newUrls);
+			expect(toggle.horizonUrls).not.toEqual(originalUrls);
+		});
+
+		test("should handle single URL in array", () => {
+			const toggle = new Toggle();
+			const singleUrl = ["https://single.toggle.hyphen.cloud"];
+			toggle.horizonUrls = singleUrl;
+			expect(toggle.horizonUrls).toEqual(singleUrl);
+			expect(toggle.horizonUrls.length).toBe(1);
+		});
+
+		test("should handle multiple URLs with different formats", () => {
+			const toggle = new Toggle();
+			const mixedUrls = [
+				"https://prod.toggle.hyphen.cloud",
+				"http://staging.toggle.hyphen.cloud",
+				"https://org-123.toggle.hyphen.cloud",
+				"https://api.custom-domain.com/toggle",
+			];
+			toggle.horizonUrls = mixedUrls;
+			expect(toggle.horizonUrls).toEqual(mixedUrls);
+			expect(toggle.horizonUrls.length).toBe(4);
+		});
+
+		test("should handle very large URL array", () => {
+			const toggle = new Toggle();
+			const largeUrlArray = Array.from(
+				{ length: 100 },
+				(_, i) => `https://endpoint-${i}.toggle.hyphen.cloud`,
+			);
+			toggle.horizonUrls = largeUrlArray;
+			expect(toggle.horizonUrls).toEqual(largeUrlArray);
+			expect(toggle.horizonUrls.length).toBe(100);
+		});
+
+		test("should not interfere with other properties", () => {
+			const toggle = new Toggle();
+			const testUrls = ["https://test.hyphen.cloud"];
+			const testContext = getRandomToggleContext();
+			const testOrgId = "test-org";
+
+			toggle.horizonUrls = testUrls;
+			toggle.defaultContext = testContext;
+			toggle.organizationId = testOrgId;
+
+			expect(toggle.horizonUrls).toEqual(testUrls);
+			expect(toggle.defaultContext).toBe(testContext);
+			expect(toggle.organizationId).toBe(testOrgId);
+		});
+
+		test("should work with constructor containing all options", () => {
+			const testUrls = [
+				"https://primary.toggle.hyphen.cloud",
+				"https://secondary.toggle.hyphen.cloud",
+			];
+			const testContext = getRandomToggleContext();
+			const toggle = new Toggle({
+				publicApiKey: "public_test-comprehensive-key",
+				defaultContext: testContext,
+				horizonUrls: testUrls,
+			});
+
+			expect(toggle.horizonUrls).toEqual(testUrls);
+			expect(toggle.defaultContext).toBe(testContext);
+			expect(toggle.publicApiKey).toBe("public_test-comprehensive-key");
+		});
+
+		test("should handle URLs with query parameters and paths", () => {
+			const toggle = new Toggle();
+			const complexUrls = [
+				"https://api.hyphen.cloud/v1/toggle?version=latest",
+				"https://cdn.hyphen.cloud/toggle/endpoint",
+				"https://backup.hyphen.cloud:8443/api/toggle",
+			];
+			toggle.horizonUrls = complexUrls;
+			expect(toggle.horizonUrls).toEqual(complexUrls);
+		});
+	});
+
 	describe("organizationId property", () => {
 		test("should return undefined by default", () => {
 			const toggle = new Toggle();
