@@ -638,7 +638,7 @@ describe("Hyphen sdk", () => {
 			}
 
 			const result = await toggle.fetch<MockHttpResponse>("/post", {
-				body: JSON.stringify({ test: "data" }),
+				test: "data",
 			});
 			expect(result.method).toBe("POST");
 			expect(result.headers).toBeDefined();
@@ -649,9 +649,7 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
 			await expect(
-				toggle.fetch("/status/404", {
-					body: JSON.stringify({ test: "error" }),
-				}),
+				toggle.fetch("/status/404", { test: "error" }),
 			).rejects.toThrow("HTTP 404");
 		});
 
@@ -659,9 +657,7 @@ describe("Hyphen sdk", () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
 			await expect(
-				toggle.fetch("/status/500", {
-					body: JSON.stringify({ test: "error" }),
-				}),
+				toggle.fetch("/status/500", { test: "error" }),
 			).rejects.toThrow("HTTP 500");
 		});
 
@@ -677,7 +673,8 @@ describe("Hyphen sdk", () => {
 			}
 
 			const result = await toggle.fetch<MockHttpPostResponse>("/post", {
-				body: JSON.stringify({ test: "hello", number: 42 }),
+				test: "hello",
+				number: 42,
 			});
 			expect(result.method).toBe("POST");
 			expect(result.body.test).toBe("hello");
@@ -696,7 +693,7 @@ describe("Hyphen sdk", () => {
 			}
 
 			const result = await toggle.fetch<MockHttpResponse>("/post", {
-				body: JSON.stringify({ test: "auth" }),
+				test: "auth",
 			});
 			expect(result.method).toBe("POST");
 			expect(result.headers["x-api-key"]).toBe("public_test-key");
@@ -710,10 +707,13 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.fetch<MockHttpResponse>("/post", {
-				headers: { "X-Custom-Header": "test-value" },
-				body: JSON.stringify({ test: "custom" }),
-			});
+			const result = await toggle.fetch<MockHttpResponse>(
+				"/post",
+				{ test: "custom" },
+				{
+					headers: { "X-Custom-Header": "test-value" },
+				},
+			);
 
 			expect(result.method).toBe("POST");
 			expect(result.headers["x-custom-header"]).toBe("test-value");
@@ -722,18 +722,14 @@ describe("Hyphen sdk", () => {
 		test("should work with path without leading slash", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			const result = await toggle.fetch("post", {
-				body: JSON.stringify({ test: "data" }),
-			});
+			const result = await toggle.fetch("post", { test: "data" });
 			expect(result).toBeDefined();
 		});
 
 		test("should work with path with leading slash", async () => {
 			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
 
-			const result = await toggle.fetch("/post", {
-				body: JSON.stringify({ test: "data" }),
-			});
+			const result = await toggle.fetch("/post", { test: "data" });
 			expect(result).toBeDefined();
 		});
 
@@ -745,9 +741,7 @@ describe("Hyphen sdk", () => {
 				],
 			});
 
-			const result = await toggle.fetch("/post", {
-				body: JSON.stringify({ test: "data" }),
-			});
+			const result = await toggle.fetch("/post", { test: "data" });
 			expect(result).toBeDefined();
 		});
 
@@ -759,7 +753,7 @@ describe("Hyphen sdk", () => {
 				],
 			});
 
-			await expect(toggle.fetch("/test")).rejects.toThrow(
+			await expect(toggle.fetch("/test", { test: "data" })).rejects.toThrow(
 				"All horizon URLs failed",
 			);
 		});
@@ -767,9 +761,7 @@ describe("Hyphen sdk", () => {
 		test("should handle URLs with trailing slashes correctly", async () => {
 			const toggle = new Toggle({ horizonUrls: [`${baseMockUrl}/`] });
 
-			const result = await toggle.fetch("/post", {
-				body: JSON.stringify({ test: "data" }),
-			});
+			const result = await toggle.fetch("/post", { test: "data" });
 			expect(result).toBeDefined();
 		});
 
@@ -784,10 +776,13 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.fetch<MockHttpResponse>("/post", {
-				headers: headers,
-				body: JSON.stringify({ test: "headers" }),
-			});
+			const result = await toggle.fetch<MockHttpResponse>(
+				"/post",
+				{ test: "headers" },
+				{
+					headers: headers,
+				},
+			);
 
 			expect(result.method).toBe("POST");
 			expect(result.headers["x-test-header"]).toBe("headers-object-value");
@@ -801,13 +796,16 @@ describe("Hyphen sdk", () => {
 				headers: Record<string, string>;
 			}
 
-			const result = await toggle.fetch<MockHttpResponse>("/post", {
-				headers: [
-					["X-Array-Header", "array-value"],
-					["X-Another-Header", "another-value"],
-				],
-				body: JSON.stringify({ test: "array" }),
-			});
+			const result = await toggle.fetch<MockHttpResponse>(
+				"/post",
+				{ test: "array" },
+				{
+					headers: [
+						["X-Array-Header", "array-value"],
+						["X-Another-Header", "another-value"],
+					],
+				},
+			);
 
 			expect(result.method).toBe("POST");
 			expect(result.headers["x-array-header"]).toBe("array-value");
@@ -826,13 +824,145 @@ describe("Hyphen sdk", () => {
 			}) as typeof fetch;
 
 			try {
-				await expect(toggle.fetch("/test")).rejects.toThrow(
+				await expect(toggle.fetch("/test", { test: "data" })).rejects.toThrow(
 					"All horizon URLs failed",
 				);
 			} finally {
 				// Restore original fetch
 				global.fetch = originalFetch;
 			}
+		});
+
+		test("should send payload as JSON in request body", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			interface MockHttpResponse {
+				method: string;
+				body: {
+					name: string;
+					age: number;
+					active: boolean;
+				};
+			}
+
+			const payload = { name: "test-user", age: 25, active: true };
+			const result = await toggle.fetch<MockHttpResponse>("/post", payload);
+
+			expect(result.method).toBe("POST");
+			expect(result.body.name).toBe("test-user");
+			expect(result.body.age).toBe(25);
+			expect(result.body.active).toBe(true);
+		});
+
+		test("should handle undefined payload", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			interface MockHttpResponse {
+				method: string;
+				body: unknown;
+			}
+
+			const result = await toggle.fetch<MockHttpResponse>("/post", undefined, {
+				body: JSON.stringify({ default: "body" }),
+			});
+			expect(result.method).toBe("POST");
+		});
+
+		test("should handle null payload", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			interface MockHttpResponse {
+				method: string;
+				body: unknown;
+			}
+
+			const result = await toggle.fetch<MockHttpResponse>("/post", null, {
+				body: JSON.stringify({ default: "body" }),
+			});
+			expect(result.method).toBe("POST");
+		});
+
+		test("should handle complex nested payload", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			interface MockHttpResponse {
+				method: string;
+				body: {
+					user: {
+						profile: {
+							name: string;
+							preferences: string[];
+						};
+					};
+					metadata: Record<string, unknown>;
+				};
+			}
+
+			const complexPayload = {
+				user: {
+					profile: {
+						name: "complex-user",
+						preferences: ["dark-mode", "notifications"],
+					},
+				},
+				metadata: {
+					version: "1.0",
+					feature_flags: { newUI: true },
+				},
+			};
+
+			const result = await toggle.fetch<MockHttpResponse>(
+				"/post",
+				complexPayload,
+			);
+
+			expect(result.method).toBe("POST");
+			expect(result.body.user.profile.name).toBe("complex-user");
+			expect(result.body.user.profile.preferences).toEqual([
+				"dark-mode",
+				"notifications",
+			]);
+			expect(result.body.metadata.version).toBe("1.0");
+		});
+
+		test("should prioritize payload over options.body when both provided", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			interface MockHttpResponse {
+				method: string;
+				body: {
+					source: string;
+				};
+			}
+
+			const result = await toggle.fetch<MockHttpResponse>(
+				"/post",
+				{ source: "payload" },
+				{
+					body: JSON.stringify({ source: "options" }),
+				},
+			);
+
+			expect(result.method).toBe("POST");
+			expect(result.body.source).toBe("payload");
+		});
+
+		test("should fall back to options.body when payload is undefined", async () => {
+			const toggle = new Toggle({ horizonUrls: [baseMockUrl] });
+
+			interface MockHttpResponse {
+				method: string;
+				body: {
+					source: string;
+				};
+			}
+
+			const result = await toggle.fetch<MockHttpResponse>("/post", undefined, {
+				body: JSON.stringify({ source: "options" }),
+			});
+
+			expect(result.method).toBe("POST");
+			expect(result.body.source).toBe("options");
 		});
 	});
 
