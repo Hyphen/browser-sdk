@@ -8,7 +8,7 @@ export default defineConfig({
 				'dist/**',
 				'vitest.config.ts',
 				'tsup.config.ts',
-				'src/toggle-context.ts',
+				'src/types.ts',
 			],
 		},
 	},
