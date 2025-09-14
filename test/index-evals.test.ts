@@ -169,7 +169,7 @@ describe("Toggle Evaluations", () => {
 			const toggle = new Toggle({
 				publicApiKey: "public_test-key",
 				applicationId: "", // This will cause validation to fail
-				defaultContext: { targetingKey: "test" }
+				defaultContext: { targetingKey: "test" },
 			});
 
 			const result = await toggle.get("test-toggle", "validation-failed");
@@ -180,7 +180,7 @@ describe("Toggle Evaluations", () => {
 			const toggle = new Toggle({
 				publicApiKey: "public_test-key",
 				// No applicationId provided, will be undefined -> ""
-				defaultContext: { targetingKey: "test" }
+				defaultContext: { targetingKey: "test" },
 			});
 
 			const result = await toggle.get("test-toggle", "validation-failed");
