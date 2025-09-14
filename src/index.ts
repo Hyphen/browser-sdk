@@ -396,6 +396,22 @@ export class Toggle extends Hookified {
 	}
 
 	/**
+	 * Generates a unique targeting key based on available context.
+	 *
+	 * @returns A targeting key in the format: `[app]-[env]-[random]` or simplified versions
+	 */
+	public generateTargetKey(): string {
+		const randomSuffix = Math.random().toString(36).substring(7);
+		const app = this._applicationId || "";
+		const env = this._environment || "";
+
+		// Build key components in order of preference
+		const components = [app, env, randomSuffix].filter(Boolean);
+
+		return components.join("-");
+	}
+
+	/**
 	 * Extracts targeting key from a toggle context with fallback logic.
 	 *
 	 * @param context - The toggle context to extract targeting key from
@@ -410,21 +426,5 @@ export class Toggle extends Hookified {
 		}
 		// TODO: what is a better way to do this? Should we also have a service property so we don't add the random value?
 		return this._defaultTargetingKey;
-	}
-
-	/**
-	 * Generates a unique targeting key based on available context.
-	 *
-	 * @returns A targeting key in the format: `[app]-[env]-[random]` or simplified versions
-	 */
-	private generateTargetKey(): string {
-		const randomSuffix = Math.random().toString(36).substring(7);
-		const app = this._applicationId || "";
-		const env = this._environment || "";
-
-		// Build key components in order of preference
-		const components = [app, env, randomSuffix].filter(Boolean);
-
-		return components.join("-");
 	}
 }
