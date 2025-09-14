@@ -55,7 +55,7 @@ export type ToggleContext = {
 	/**
 	 * Primary key used for targeting and bucketing.
 	 */
-	targetingKey: string;
+	targetingKey?: string;
 
 	/**
 	 * IP address of the user making the request.

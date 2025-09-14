@@ -415,6 +415,148 @@ describe("Hyphen sdk", () => {
 		});
 	});
 
+	describe("defaultTargetingKey property", () => {
+		test("should generate random key by default", () => {
+			const toggle = new Toggle();
+			expect(toggle.defaultTargetingKey).toBeDefined();
+			expect(typeof toggle.defaultTargetingKey).toBe("string");
+			expect(toggle.defaultTargetingKey.length).toBeGreaterThan(0);
+		});
+
+		test("should be set when constructor receives defaultTargetKey option", () => {
+			const toggle = new Toggle({
+				defaultTargetKey: "explicit-key",
+			});
+			expect(toggle.defaultTargetingKey).toBe("explicit-key");
+		});
+
+		test("should be set from defaultContext with targetingKey", () => {
+			const toggle = new Toggle({
+				defaultContext: { targetingKey: "context-key" },
+			});
+			expect(toggle.defaultTargetingKey).toBe("context-key");
+		});
+
+		test("should be set from defaultContext with user.id", () => {
+			const toggle = new Toggle({
+				defaultContext: {
+					user: { id: "user-123" },
+				},
+			});
+			expect(toggle.defaultTargetingKey).toBe("user-123");
+		});
+
+		test("should generate key with applicationId and environment when no context", () => {
+			const toggle = new Toggle({
+				applicationId: "test-app",
+				environment: "production",
+			});
+			expect(toggle.defaultTargetingKey).toMatch(
+				/^test-app-production-[a-z0-9]+$/,
+			);
+		});
+
+		test("should prefer defaultTargetKey option over defaultContext", () => {
+			const toggle = new Toggle({
+				defaultTargetKey: "explicit-key",
+				defaultContext: {
+					targetingKey: "context-key",
+				},
+			});
+			expect(toggle.defaultTargetingKey).toBe("explicit-key");
+		});
+
+		test("should prefer targetingKey over user.id in context", () => {
+			const toggle = new Toggle({
+				defaultContext: {
+					targetingKey: "targeting-key",
+					user: { id: "user-123" },
+				},
+			});
+			expect(toggle.defaultTargetingKey).toBe("targeting-key");
+		});
+
+		test("should allow setting defaultTargetingKey property", () => {
+			const toggle = new Toggle();
+			const originalKey = toggle.defaultTargetingKey;
+			toggle.defaultTargetingKey = "custom-key";
+			expect(toggle.defaultTargetingKey).toBe("custom-key");
+			expect(toggle.defaultTargetingKey).not.toBe(originalKey);
+		});
+
+		test("should generate different keys for different instances", () => {
+			const toggle1 = new Toggle();
+			const toggle2 = new Toggle();
+			expect(toggle1.defaultTargetingKey).not.toBe(toggle2.defaultTargetingKey);
+		});
+
+		test("should generate key with applicationId and default environment", () => {
+			const toggle = new Toggle({
+				applicationId: "test-app",
+			});
+			expect(toggle.defaultTargetingKey).toMatch(
+				/^test-app-development-[a-z0-9]+$/,
+			);
+		});
+
+		test("should generate key with environment only", () => {
+			const toggle = new Toggle({
+				environment: "staging",
+			});
+			expect(toggle.defaultTargetingKey).toMatch(/^staging-[a-z0-9]+$/);
+		});
+
+		test("should fall back to getTargetingKey when defaultContext returns to default", () => {
+			const toggle = new Toggle({
+				defaultContext: {},
+			});
+			expect(toggle.defaultTargetingKey).toBeDefined();
+			expect(typeof toggle.defaultTargetingKey).toBe("string");
+		});
+
+		test("should generate key with environment when no applicationId", () => {
+			const toggle = new Toggle();
+			// This triggers generateTargetKey() since no defaultContext is provided
+			expect(toggle.defaultTargetingKey).toMatch(/^development-[a-z0-9]+$/);
+		});
+
+		test("should handle empty string values in key generation", () => {
+			const toggle = new Toggle({
+				applicationId: "",
+				environment: "",
+			});
+			// Empty environment defaults to "development", empty app is filtered out
+			expect(toggle.defaultTargetingKey).toMatch(/^development-[a-z0-9]+$/);
+		});
+
+		test("should generate key when environment is explicitly set to empty", () => {
+			const toggle = new Toggle({
+				applicationId: "test-app",
+				environment: "",
+			});
+			// Empty environment defaults to "development"
+			expect(toggle.defaultTargetingKey).toMatch(
+				/^test-app-development-[a-z0-9]+$/,
+			);
+		});
+
+		test("should handle environment set to undefined after construction", () => {
+			const toggle = new Toggle({
+				applicationId: "test-app",
+			});
+
+			// Set environment to undefined to trigger the fallback branch
+			toggle.environment = undefined;
+
+			// Set a new defaultContext to trigger regeneration via getTargetingKey
+			toggle.defaultContext = {};
+
+			// This should eventually trigger generateTargetKey with undefined environment
+			expect(toggle.defaultTargetingKey).toBeDefined();
+			expect(typeof toggle.defaultTargetingKey).toBe("string");
+		});
+	});
+
 	describe("environment property", () => {
 		test("should return 'development' by default", () => {
 			const toggle = new Toggle();

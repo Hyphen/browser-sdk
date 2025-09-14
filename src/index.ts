@@ -25,6 +25,8 @@ export type ToggleOptions = {
 	applicationId?: string;
 
 	environment?: string;
+
+	defaultTargetKey?: string;
 };
 
 export class Toggle extends Hookified {
@@ -35,9 +37,21 @@ export class Toggle extends Hookified {
 	private _horizonUrls: string[] = [];
 
 	private _defaultContext: ToggleContext | undefined;
+	private _defaultTargetingKey: string =
+		`${Math.random().toString(36).substring(7)}`;
 
 	constructor(options?: ToggleOptions) {
 		super();
+
+		if (options?.applicationId) {
+			this._applicationId = options.applicationId;
+		}
+
+		if (options?.environment) {
+			this._environment = options.environment;
+		} else {
+			this._environment = "development";
+		}
 
 		if (options?.defaultContext) {
 			this._defaultContext = options.defaultContext;
@@ -56,14 +70,14 @@ export class Toggle extends Hookified {
 			}
 		}
 
-		if (options?.applicationId) {
-			this._applicationId = options.applicationId;
-		}
-
-		if (options?.environment) {
-			this._environment = options.environment;
+		if (options?.defaultTargetKey) {
+			this._defaultTargetingKey = options?.defaultTargetKey;
 		} else {
-			this._environment = "development";
+			if (this._defaultContext) {
+				this._defaultTargetingKey = this.getTargetingKey(this._defaultContext);
+			} else {
+				this._defaultTargetingKey = this.generateTargetKey();
+			}
 		}
 	}
 
@@ -191,6 +205,24 @@ export class Toggle extends Hookified {
 	 */
 	public set environment(value: string | undefined) {
 		this._environment = value;
+	}
+
+	/**
+	 * Gets the default targeting key used for toggle evaluations.
+	 *
+	 * @returns The current default targeting key or undefined if not set
+	 */
+	public get defaultTargetingKey(): string {
+		return this._defaultTargetingKey;
+	}
+
+	/**
+	 * Sets the default targeting key used for toggle evaluations.
+	 *
+	 * @param value - The targeting key string or undefined to clear
+	 */
+	public set defaultTargetingKey(value: string) {
+		this._defaultTargetingKey = value;
 	}
 
 	/**
@@ -361,5 +393,38 @@ export class Toggle extends Hookified {
 		return orgId
 			? `https://${orgId}.toggle.hyphen.cloud`
 			: "https://toggle.hyphen.cloud";
+	}
+
+	/**
+	 * Extracts targeting key from a toggle context with fallback logic.
+	 *
+	 * @param context - The toggle context to extract targeting key from
+	 * @returns The targeting key string
+	 */
+	private getTargetingKey(context: ToggleContext): string {
+		if (context.targetingKey) {
+			return context.targetingKey;
+		}
+		if (context.user) {
+			return context.user.id;
+		}
+		// TODO: what is a better way to do this? Should we also have a service property so we don't add the random value?
+		return this._defaultTargetingKey;
+	}
+
+	/**
+	 * Generates a unique targeting key based on available context.
+	 *
+	 * @returns A targeting key in the format: `[app]-[env]-[random]` or simplified versions
+	 */
+	private generateTargetKey(): string {
+		const randomSuffix = Math.random().toString(36).substring(7);
+		const app = this._applicationId || "";
+		const env = this._environment || "";
+
+		// Build key components in order of preference
+		const components = [app, env, randomSuffix].filter(Boolean);
+
+		return components.join("-");
 	}
 }
