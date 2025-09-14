@@ -136,8 +136,8 @@ describe("getOrgIdFromPublicKey", () => {
 });
 
 describe("fetch method", () => {
-	test("should throw error when no horizon URLs are configured", async () => {
-		const toggle = new Toggle();
+	test("should throw error when horizon URLs array is explicitly empty", async () => {
+		const toggle = new Toggle({ horizonUrls: [] });
 		await expect(toggle.fetch("/api/test")).rejects.toThrow(
 			"No horizon URLs configured. Set horizonUrls or provide a valid publicApiKey.",
 		);
