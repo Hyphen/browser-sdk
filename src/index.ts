@@ -286,6 +286,38 @@ export class Toggle extends Hookified {
 		return defaultValue;
 	}
 
+	public async getBoolean(
+		toggleKey: string,
+		defaultValue: boolean,
+		options?: GetOptions,
+	): Promise<boolean> {
+		return this.get<boolean>(toggleKey, defaultValue, options);
+	}
+
+	public async getString(
+		toggleKey: string,
+		defaultValue: string,
+		options?: GetOptions,
+	): Promise<string> {
+		return this.get<string>(toggleKey, defaultValue, options);
+	}
+
+	public async getObject<T extends object>(
+		toggleKey: string,
+		defaultValue: T,
+		options?: GetOptions,
+	): Promise<T> {
+		return this.get<T>(toggleKey, defaultValue, options);
+	}
+
+	public async getNumber(
+		toggleKey: string,
+		defaultValue: number,
+		options?: GetOptions,
+	): Promise<number> {
+		return this.get<number>(toggleKey, defaultValue, options);
+	}
+
 	/**
 	 * Makes an HTTP POST request to the specified URL with automatic authentication.
 	 *
