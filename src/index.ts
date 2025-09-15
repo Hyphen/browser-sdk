@@ -1,5 +1,11 @@
 import { Hookified } from "hookified";
-import type { ToggleContext } from "./types.js";
+import {
+	type EvaluationResponse,
+	type GetOptions,
+	type ToggleContext,
+	type ToggleEvaluation,
+	ToggleEvents,
+} from "./types.js";
 
 export type { ToggleContext } from "./types.js";
 
@@ -65,9 +71,7 @@ export class Toggle extends Hookified {
 		if (options?.horizonUrls) {
 			this._horizonUrls = options.horizonUrls;
 		} else {
-			if (this._publicApiKey) {
-				this._horizonUrls = [this.getDefaultHorizonUrl(this._publicApiKey)];
-			}
+			this._horizonUrls = [this.getDefaultHorizonUrl(this._publicApiKey)];
 		}
 
 		if (options?.defaultTargetKey) {
@@ -223,6 +227,63 @@ export class Toggle extends Hookified {
 	 */
 	public set defaultTargetingKey(value: string) {
 		this._defaultTargetingKey = value;
+	}
+
+	public async get<T>(
+		toggleKey: string,
+		defaultValue: T,
+		options?: GetOptions,
+	): Promise<T> {
+		try {
+			const context: ToggleEvaluation = {
+				application: this._applicationId ?? "",
+				environment: this._environment ?? "development",
+			};
+
+			if (options?.context) {
+				context.targetingKey = options?.context.targetingKey;
+				context.ipAddress = options?.context.ipAddress;
+				context.user = options?.context.user;
+				context.customAttributes = options?.context.customAttributes;
+			} else {
+				context.targetingKey = this._defaultContext?.targetingKey;
+				context.ipAddress = this._defaultContext?.ipAddress;
+				context.user = this._defaultContext?.user;
+				context.customAttributes = this._defaultContext?.customAttributes;
+			}
+
+			const fetchOptions = { headers: {} as Record<string, string> };
+
+			if (!context.targetingKey) {
+				context.targetingKey = this.getTargetingKey(context);
+			}
+
+			// api key
+			if (this._publicApiKey) {
+				fetchOptions.headers["x-api-key"] = this._publicApiKey;
+			} else {
+				throw new Error("You must set the publicApiKey");
+			}
+
+			// application
+			if (context.application === "") {
+				throw new Error("You must set the applicationId");
+			}
+
+			const result = await this.fetch<EvaluationResponse>(
+				"/toggle/evaluate",
+				context,
+				fetchOptions,
+			);
+
+			if (result?.toggles) {
+				return result.toggles[toggleKey].value as T;
+			}
+		} catch (error) {
+			this.emit(ToggleEvents.Error, error);
+		}
+
+		return defaultValue;
 	}
 
 	/**
@@ -388,11 +449,15 @@ export class Toggle extends Hookified {
 	 * console.log(defaultUrl); // 'https://toggle.hyphen.cloud'
 	 * ```
 	 */
-	public getDefaultHorizonUrl(publicKey: string): string {
-		const orgId = this.getOrgIdFromPublicKey(publicKey);
-		return orgId
-			? `https://${orgId}.toggle.hyphen.cloud`
-			: "https://toggle.hyphen.cloud";
+	public getDefaultHorizonUrl(publicKey?: string): string {
+		if (publicKey) {
+			const orgId = this.getOrgIdFromPublicKey(publicKey);
+			return orgId
+				? `https://${orgId}.toggle.hyphen.cloud`
+				: "https://toggle.hyphen.cloud";
+		}
+
+		return "https://toggle.hyphen.cloud";
 	}
 
 	/**

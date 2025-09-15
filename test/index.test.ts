@@ -236,9 +236,9 @@ describe("Hyphen sdk", () => {
 	});
 
 	describe("horizonUrls property", () => {
-		test("should return empty array by default", () => {
+		test("should return default url", () => {
 			const toggle = new Toggle();
-			expect(toggle.horizonUrls).toEqual([]);
+			expect(toggle.horizonUrls).toEqual(["https://toggle.hyphen.cloud"]);
 		});
 
 		test("should be set when constructor receives horizonUrls option", () => {
@@ -258,7 +258,7 @@ describe("Hyphen sdk", () => {
 		test("should allow getting the horizonUrls property", () => {
 			const toggle = new Toggle();
 			const urls = toggle.horizonUrls;
-			expect(urls).toEqual([]);
+			expect(urls).toEqual(["https://toggle.hyphen.cloud"]);
 			expect(Array.isArray(urls)).toBe(true);
 		});
 
@@ -683,6 +683,17 @@ describe("Hyphen sdk", () => {
 
 			expect(toggle.organizationId).toBe(testOrgId);
 			expect(toggle.defaultContext).toBe(testContext);
+		});
+	});
+
+	describe("get method", () => {
+		test("should return defaultValue when error occurs", async () => {
+			const toggle = new Toggle({
+				horizonUrls: ["https://api.test.com"],
+			});
+
+			const result = await toggle.get("feature-flag", false);
+			expect(result).toBe(false); // Returns defaultValue when error occurs
 		});
 	});
 });

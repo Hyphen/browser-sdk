@@ -73,6 +73,11 @@ export type ToggleContext = {
 	user?: ToggleUser;
 };
 
+export type ToggleEvaluation = {
+	application: string;
+	environment: string;
+} & ToggleContext;
+
 export interface Evaluation {
 	key: string;
 	value: boolean | string | number | Record<string, unknown>;
@@ -83,4 +88,13 @@ export interface Evaluation {
 
 export interface EvaluationResponse {
 	toggles: Record<string, Evaluation>;
+}
+
+export type GetOptions = {
+	context?: ToggleContext;
+	cache?: boolean;
+};
+
+export enum ToggleEvents {
+	Error = "error",
 }
