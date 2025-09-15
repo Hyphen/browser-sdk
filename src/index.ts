@@ -132,15 +132,6 @@ export class Toggle extends Hookified {
 	}
 
 	/**
-	 * Sets the organization ID.
-	 *
-	 * @param value - The organization ID string or undefined to clear
-	 */
-	public set organizationId(value: string | undefined) {
-		this._organizationId = value;
-	}
-
-	/**
 	 * Gets the Horizon endpoint URLs used for load balancing.
 	 *
 	 * These URLs are used to distribute requests across multiple Horizon endpoints.
