@@ -71,7 +71,7 @@ export class Toggle extends Hookified {
 		if (options?.horizonUrls) {
 			this._horizonUrls = options.horizonUrls;
 		} else {
-			this._horizonUrls = [this.getDefaultHorizonUrl(this._publicApiKey)];
+			this._horizonUrls = this.getDefaultHorizonUrls(this._publicApiKey);
 		}
 
 		if (options?.defaultTargetKey) {
@@ -551,6 +551,26 @@ export class Toggle extends Hookified {
 		}
 
 		return "https://toggle.hyphen.cloud";
+	}
+
+	/**
+	 * Will get the urls. If you pass in the public key it will provide two urls.
+	 * @param publicKey
+	 * @returns
+	 */
+	public getDefaultHorizonUrls(publicKey?: string): string[] {
+		let result = [this.getDefaultHorizonUrl()];
+		if (publicKey) {
+			const defaultUrl = result[0];
+			const orgUrl = this.getDefaultHorizonUrl(publicKey);
+			result = [];
+			if (orgUrl !== defaultUrl) {
+				result.push(orgUrl);
+			}
+			// make the default url the secondary
+			result.push(defaultUrl);
+		}
+		return result;
 	}
 
 	/**
