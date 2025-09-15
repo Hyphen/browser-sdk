@@ -1,6 +1,7 @@
 ![Hyphen AI](https://github.com/Hyphen/nodejs-sdk/raw/main/logo.png)
 
 [![tests](https://github.com/Hyphen/nodejs-toggle-sdk/actions/workflows/tests.yaml/badge.svg)](https://github.com/Hyphen/nodejs-toggle-sdk/actions/workflows/tests.yaml)
+[![](https://data.jsdelivr.com/v1/package/npm/@hyphen/browser-sdk/badge)](https://www.jsdelivr.com/package/npm/@hyphen/browser-sdk)
 [![npm](https://img.shields.io/npm/v/@hyphen/toggle)](https://www.npmjs.com/package/@hyphen/toggle)
 [![npm](https://img.shields.io/npm/dm/@hyphen/toggle)](https://www.npmjs.com/package/@hyphen/toggle)
 [![license](https://img.shields.io/github/license/Hyphen/nodejs-toggle-sdk)](https://github.com/hyphen/nodejs-toggle-sdk/blob/main/LICENSE)
