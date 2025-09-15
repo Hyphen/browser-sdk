@@ -53,6 +53,62 @@ describe("Toggle Evaluations", () => {
 		expect(result).toBe("Hyphen!");
 	});
 
+	test("getBoolean helper method", async () => {
+		const toggle = new Toggle();
+		toggle.publicApiKey = hyphenPublicApiKey;
+		toggle.applicationId = hyphenApplicationId;
+		toggle.defaultContext = context;
+
+		const result = await toggle.getBoolean("hyphen-sdk-boolean", false);
+
+		expect(typeof result).toBe("boolean");
+		expect(result).toBe(true);
+	});
+
+	test("getString helper method", async () => {
+		const toggle = new Toggle();
+		toggle.publicApiKey = hyphenPublicApiKey;
+		toggle.applicationId = hyphenApplicationId;
+		toggle.defaultContext = context;
+
+		const result = await toggle.getString(
+			"hyphen-sdk-string",
+			"default-string",
+		);
+
+		expect(typeof result).toBe("string");
+		expect(result).toBe("Hyphen!");
+	});
+
+	test("getNumber helper method", async () => {
+		const toggle = new Toggle();
+		toggle.publicApiKey = hyphenPublicApiKey;
+		toggle.applicationId = hyphenApplicationId;
+		toggle.defaultContext = context;
+
+		const result = await toggle.getNumber("hyphen-sdk-number", 0);
+
+		expect(typeof result).toBe("number");
+		expect(result).toBe(42);
+	});
+
+	test("getObject helper method", async () => {
+		const toggle = new Toggle();
+		toggle.publicApiKey = hyphenPublicApiKey;
+		toggle.applicationId = hyphenApplicationId;
+		toggle.defaultContext = context;
+
+		const result = await toggle.getObject("hyphen-sdk-json", {});
+
+		// The toggle returns a JSON string, so we expect a string type
+		expect(typeof result).toBe("string");
+		expect(result).toBe('{ "id": "Hello World!"}');
+
+		// Verify it's valid JSON
+		const parsed = JSON.parse(result as string);
+		expect(parsed).toEqual({ id: "Hello World!" });
+	});
+
 	describe("get method error handling", () => {
 		test("should return defaultValue when no publicApiKey is set", async () => {
 			const toggle = new Toggle({
