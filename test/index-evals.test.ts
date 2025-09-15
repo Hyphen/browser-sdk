@@ -10,10 +10,16 @@ hyphen-sdk-number
 hyphen-sdk-string
 */
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const hyphenPublicApiKey = process.env.HYPHEN_PUBLIC_API_KEY;
 const hyphenApplicationId = process.env.HYPHEN_APPLICATION_ID;
+
+// check that we have values
+
+if (!hyphenPublicApiKey || !hyphenApplicationId) {
+	console.warn("You need HYPHEN_PUBLIC_API_KEY and HYPHEN_APPLICATION_ID");
+}
 
 const context: ToggleContext = {
 	targetingKey: "user-123",
