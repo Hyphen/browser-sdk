@@ -15,6 +15,8 @@ dotenv.config({ quiet: true });
 const hyphenPublicApiKey = process.env.HYPHEN_PUBLIC_API_KEY;
 const hyphenApplicationId = process.env.HYPHEN_APPLICATION_ID;
 
+const defaultTimeout = 10_000;
+
 // check that we have values
 
 if (!hyphenPublicApiKey || !hyphenApplicationId) {
@@ -39,107 +41,139 @@ const context: ToggleContext = {
 };
 
 describe("Toggle Evaluations", () => {
-	test("Getting a string", async () => {
-		const toggle = new Toggle();
-		toggle.publicApiKey = hyphenPublicApiKey;
-		toggle.applicationId = hyphenApplicationId;
-		toggle.defaultContext = context;
+	test(
+		"Getting a string",
+		async () => {
+			const toggle = new Toggle();
+			toggle.publicApiKey = hyphenPublicApiKey;
+			toggle.applicationId = hyphenApplicationId;
+			toggle.defaultContext = context;
 
-		const result = await toggle.get<string>(
-			"hyphen-sdk-string",
-			"fake-default-value-123",
-		);
+			const result = await toggle.get<string>(
+				"hyphen-sdk-string",
+				"fake-default-value-123",
+			);
 
-		expect(result).toBe("Hyphen!");
-	});
+			expect(result).toBe("Hyphen!");
+		},
+		defaultTimeout,
+	);
 
-	test("getBoolean helper method", async () => {
-		const toggle = new Toggle();
-		toggle.publicApiKey = hyphenPublicApiKey;
-		toggle.applicationId = hyphenApplicationId;
-		toggle.defaultContext = context;
+	test(
+		"getBoolean helper method",
+		async () => {
+			const toggle = new Toggle();
+			toggle.publicApiKey = hyphenPublicApiKey;
+			toggle.applicationId = hyphenApplicationId;
+			toggle.defaultContext = context;
 
-		const result = await toggle.getBoolean("hyphen-sdk-boolean", false);
+			const result = await toggle.getBoolean("hyphen-sdk-boolean", false);
 
-		expect(typeof result).toBe("boolean");
-		expect(result).toBe(true);
-	});
+			expect(typeof result).toBe("boolean");
+			expect(result).toBe(true);
+		},
+		defaultTimeout,
+	);
 
-	test("getString helper method", async () => {
-		const toggle = new Toggle();
-		toggle.publicApiKey = hyphenPublicApiKey;
-		toggle.applicationId = hyphenApplicationId;
-		toggle.defaultContext = context;
+	test(
+		"getString helper method",
+		async () => {
+			const toggle = new Toggle();
+			toggle.publicApiKey = hyphenPublicApiKey;
+			toggle.applicationId = hyphenApplicationId;
+			toggle.defaultContext = context;
 
-		const result = await toggle.getString(
-			"hyphen-sdk-string",
-			"default-string",
-		);
+			const result = await toggle.getString(
+				"hyphen-sdk-string",
+				"default-string",
+			);
 
-		expect(typeof result).toBe("string");
-		expect(result).toBe("Hyphen!");
-	});
+			expect(typeof result).toBe("string");
+			expect(result).toBe("Hyphen!");
+		},
+		defaultTimeout,
+	);
 
-	test("getNumber helper method", async () => {
-		const toggle = new Toggle();
-		toggle.publicApiKey = hyphenPublicApiKey;
-		toggle.applicationId = hyphenApplicationId;
-		toggle.defaultContext = context;
+	test(
+		"getNumber helper method",
+		async () => {
+			const toggle = new Toggle();
+			toggle.publicApiKey = hyphenPublicApiKey;
+			toggle.applicationId = hyphenApplicationId;
+			toggle.defaultContext = context;
 
-		const result = await toggle.getNumber("hyphen-sdk-number", 0);
+			const result = await toggle.getNumber("hyphen-sdk-number", 0);
 
-		expect(typeof result).toBe("number");
-		expect(result).toBe(42);
-	});
+			expect(typeof result).toBe("number");
+			expect(result).toBe(42);
+		},
+		defaultTimeout,
+	);
 
-	test("getObject helper method", async () => {
-		const toggle = new Toggle();
-		toggle.publicApiKey = hyphenPublicApiKey;
-		toggle.applicationId = hyphenApplicationId;
-		toggle.defaultContext = context;
+	test(
+		"getObject helper method",
+		async () => {
+			const toggle = new Toggle();
+			toggle.publicApiKey = hyphenPublicApiKey;
+			toggle.applicationId = hyphenApplicationId;
+			toggle.defaultContext = context;
 
-		const result = await toggle.getObject("hyphen-sdk-json", {});
+			const result = await toggle.getObject("hyphen-sdk-json", {});
 
-		// The toggle returns a JSON string, so we expect a string type
-		expect(typeof result).toBe("string");
-		expect(result).toBe('{ "id": "Hello World!"}');
+			// The toggle returns a JSON string, so we expect a string type
+			expect(typeof result).toBe("string");
+			expect(result).toBe('{ "id": "Hello World!"}');
 
-		// Verify it's valid JSON
-		const parsed = JSON.parse(result as string);
-		expect(parsed).toEqual({ id: "Hello World!" });
-	});
+			// Verify it's valid JSON
+			const parsed = JSON.parse(result as string);
+			expect(parsed).toEqual({ id: "Hello World!" });
+		},
+		defaultTimeout,
+	);
 
 	describe("get method error handling", () => {
-		test("should return defaultValue when no publicApiKey is set", async () => {
-			const toggle = new Toggle({
-				applicationId: "test-app",
-				defaultContext: { targetingKey: "test" },
-			});
+		test(
+			"should return defaultValue when no publicApiKey is set",
+			async () => {
+				const toggle = new Toggle({
+					applicationId: "test-app",
+					defaultContext: { targetingKey: "test" },
+				});
 
-			const result = await toggle.get("test-toggle", "default-value");
-			expect(result).toBe("default-value");
-		});
+				const result = await toggle.get("test-toggle", "default-value");
+				expect(result).toBe("default-value");
+			},
+			defaultTimeout,
+		);
 
-		test("should return defaultValue when no defaultContext and no context option", async () => {
-			const toggle = new Toggle({
-				publicApiKey: "public_test-key",
-				applicationId: "test-app",
-			});
+		test(
+			"should return defaultValue when no defaultContext and no context option",
+			async () => {
+				const toggle = new Toggle({
+					publicApiKey: "public_test-key",
+					applicationId: "test-app",
+				});
 
-			const result = await toggle.get("test-toggle", "fallback");
-			expect(result).toBe("fallback");
-		});
+				const result = await toggle.get("test-toggle", "fallback");
+				expect(result).toBe("fallback");
+			},
+			defaultTimeout,
+		);
 
-		test("should return defaultValue when application is empty", async () => {
-			const toggle = new Toggle({
-				publicApiKey: "public_test-key",
-				applicationId: "",
-				defaultContext: { targetingKey: "test" },
-			});
+		test(
+			"should return defaultValue when application is empty",
+			async () => {
+				const toggle = new Toggle({
+					publicApiKey: "public_test-key",
+					applicationId: "",
+					defaultContext: { targetingKey: "test" },
+				});
 
-			const result = await toggle.get("test-toggle", "default");
-			expect(result).toBe("default");
-		});
+				const result = await toggle.get("test-toggle", "default");
+				expect(result).toBe("default");
+			},
+			defaultTimeout,
+		);
 
 		test("should set targetingKey when context has no targetingKey", async () => {
 			const toggle = new Toggle({
