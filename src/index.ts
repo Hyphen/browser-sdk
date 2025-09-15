@@ -286,6 +286,23 @@ export class Toggle extends Hookified {
 		return defaultValue;
 	}
 
+	/**
+	 * Retrieves a boolean toggle value.
+	 *
+	 * This is a convenience method that wraps the generic get() method with boolean type safety.
+	 *
+	 * @param toggleKey - The key of the toggle to retrieve
+	 * @param defaultValue - The boolean value to return if the toggle is not found or an error occurs
+	 * @param options - Optional configuration including context for toggle evaluation
+	 * @returns Promise resolving to the boolean toggle value or defaultValue
+	 *
+	 * @example
+	 * ```typescript
+	 * const toggle = new Toggle({ publicApiKey: 'public_key', applicationId: 'app-id' });
+	 * const isFeatureEnabled = await toggle.getBoolean('feature-flag', false);
+	 * console.log(isFeatureEnabled); // true or false
+	 * ```
+	 */
 	public async getBoolean(
 		toggleKey: string,
 		defaultValue: boolean,
@@ -294,6 +311,23 @@ export class Toggle extends Hookified {
 		return this.get<boolean>(toggleKey, defaultValue, options);
 	}
 
+	/**
+	 * Retrieves a string toggle value.
+	 *
+	 * This is a convenience method that wraps the generic get() method with string type safety.
+	 *
+	 * @param toggleKey - The key of the toggle to retrieve
+	 * @param defaultValue - The string value to return if the toggle is not found or an error occurs
+	 * @param options - Optional configuration including context for toggle evaluation
+	 * @returns Promise resolving to the string toggle value or defaultValue
+	 *
+	 * @example
+	 * ```typescript
+	 * const toggle = new Toggle({ publicApiKey: 'public_key', applicationId: 'app-id' });
+	 * const message = await toggle.getString('welcome-message', 'Hello World');
+	 * console.log(message); // 'Welcome to our app!' or 'Hello World'
+	 * ```
+	 */
 	public async getString(
 		toggleKey: string,
 		defaultValue: string,
@@ -302,6 +336,25 @@ export class Toggle extends Hookified {
 		return this.get<string>(toggleKey, defaultValue, options);
 	}
 
+	/**
+	 * Retrieves an object toggle value.
+	 *
+	 * This is a convenience method that wraps the generic get() method with object type safety.
+	 * Note that the toggle service may return JSON as a string, which should be parsed if needed.
+	 *
+	 * @template T - The expected object type
+	 * @param toggleKey - The key of the toggle to retrieve
+	 * @param defaultValue - The object value to return if the toggle is not found or an error occurs
+	 * @param options - Optional configuration including context for toggle evaluation
+	 * @returns Promise resolving to the object toggle value or defaultValue
+	 *
+	 * @example
+	 * ```typescript
+	 * const toggle = new Toggle({ publicApiKey: 'public_key', applicationId: 'app-id' });
+	 * const config = await toggle.getObject('app-config', { theme: 'light' });
+	 * console.log(config); // { theme: 'dark', features: ['a', 'b'] } or { theme: 'light' }
+	 * ```
+	 */
 	public async getObject<T extends object>(
 		toggleKey: string,
 		defaultValue: T,
@@ -310,6 +363,23 @@ export class Toggle extends Hookified {
 		return this.get<T>(toggleKey, defaultValue, options);
 	}
 
+	/**
+	 * Retrieves a number toggle value.
+	 *
+	 * This is a convenience method that wraps the generic get() method with number type safety.
+	 *
+	 * @param toggleKey - The key of the toggle to retrieve
+	 * @param defaultValue - The number value to return if the toggle is not found or an error occurs
+	 * @param options - Optional configuration including context for toggle evaluation
+	 * @returns Promise resolving to the number toggle value or defaultValue
+	 *
+	 * @example
+	 * ```typescript
+	 * const toggle = new Toggle({ publicApiKey: 'public_key', applicationId: 'app-id' });
+	 * const maxRetries = await toggle.getNumber('max-retries', 3);
+	 * console.log(maxRetries); // 5 or 3
+	 * ```
+	 */
 	public async getNumber(
 		toggleKey: string,
 		defaultValue: number,
