@@ -586,3 +586,236 @@ describe("buildDefaultHorizonUrl", () => {
 		);
 	});
 });
+
+describe("generateTargetKey", () => {
+	test("should generate key with app, env, and random suffix when both are provided", () => {
+		const toggle = new Toggle({
+			applicationId: "myapp",
+			environment: "production",
+		});
+		const key = toggle.generateTargetKey();
+		const parts = key.split("-");
+
+		expect(parts.length).toBe(3);
+		expect(parts[0]).toBe("myapp");
+		expect(parts[1]).toBe("production");
+		expect(parts[2]).toBeTruthy(); // Random suffix should exist
+		expect(parts[2].length).toBeGreaterThan(0);
+	});
+
+	test("should generate key with env and random suffix when app is not provided", () => {
+		const toggle = new Toggle();
+		const key = toggle.generateTargetKey();
+		const parts = key.split("-");
+
+		// Environment defaults to "development" when not provided
+		expect(key).toBeTruthy();
+		expect(parts.length).toBe(2);
+		expect(parts[0]).toBe("development");
+		expect(parts[1]).toBeTruthy(); // Random suffix
+	});
+
+	test("should generate key with app, env, and random suffix when only app is provided", () => {
+		const toggle = new Toggle({
+			applicationId: "myapp",
+		});
+		const key = toggle.generateTargetKey();
+		const parts = key.split("-");
+
+		// Environment defaults to "development" when not explicitly provided
+		expect(parts.length).toBe(3);
+		expect(parts[0]).toBe("myapp");
+		expect(parts[1]).toBe("development");
+		expect(parts[2]).toBeTruthy(); // Random suffix
+	});
+
+	test("should generate key with env and random suffix when only env is provided", () => {
+		const toggle = new Toggle({
+			environment: "staging",
+		});
+		const key = toggle.generateTargetKey();
+		const parts = key.split("-");
+
+		expect(parts.length).toBe(2);
+		expect(parts[0]).toBe("staging");
+		expect(parts[1]).toBeTruthy(); // Random suffix
+	});
+
+	test("should generate different keys on consecutive calls", () => {
+		const toggle = new Toggle({
+			applicationId: "myapp",
+			environment: "production",
+		});
+		const key1 = toggle.generateTargetKey();
+		const key2 = toggle.generateTargetKey();
+
+		expect(key1).not.toBe(key2);
+		// But they should have the same prefix
+		expect(key1.startsWith("myapp-production-")).toBe(true);
+		expect(key2.startsWith("myapp-production-")).toBe(true);
+	});
+
+	test("should generate random suffix with correct format", () => {
+		const toggle = new Toggle();
+		const key = toggle.generateTargetKey();
+		const parts = key.split("-");
+
+		// Random suffix from Math.random().toString(36).substring(7)
+		// Should be alphanumeric with possible dots (base36)
+		expect(parts[parts.length - 1]).toBeTruthy();
+		expect(/^[a-z0-9.]+$/.test(parts[parts.length - 1])).toBe(true);
+	});
+
+	test("should handle empty string applicationId", () => {
+		const toggle = new Toggle({
+			applicationId: "",
+			environment: "production",
+		});
+		const key = toggle.generateTargetKey();
+		const parts = key.split("-");
+
+		// Empty string is filtered out
+		expect(parts.length).toBe(2);
+		expect(parts[0]).toBe("production");
+		expect(parts[1]).toBeTruthy();
+	});
+
+	test("should handle empty string environment", () => {
+		const toggle = new Toggle({
+			applicationId: "myapp",
+			environment: "",
+		});
+		const key = toggle.generateTargetKey();
+
+		// Empty string is filtered out, but environment defaults to "development" in constructor
+		// So we need to check the actual behavior
+		expect(key).toBeTruthy();
+		expect(key.startsWith("myapp-")).toBe(true);
+	});
+
+	test("should handle both empty strings", () => {
+		const toggle = new Toggle({
+			applicationId: "",
+			environment: "",
+		});
+		const key = toggle.generateTargetKey();
+
+		// Empty strings are filtered out, but environment defaults to "development" in constructor
+		expect(key).toBeTruthy();
+		expect(key.length).toBeGreaterThan(0);
+	});
+
+	test("should handle special characters in applicationId", () => {
+		const toggle = new Toggle({
+			applicationId: "my-app_v2",
+			environment: "prod",
+		});
+		const key = toggle.generateTargetKey();
+		const parts = key.split("-");
+
+		expect(parts.length).toBeGreaterThan(2); // Will split on hyphens in app name too
+		expect(key.startsWith("my-app_v2-prod-")).toBe(true);
+	});
+
+	test("should handle special characters in environment", () => {
+		const toggle = new Toggle({
+			applicationId: "myapp",
+			environment: "prod-us-east-1",
+		});
+		const key = toggle.generateTargetKey();
+
+		expect(key.startsWith("myapp-prod-us-east-1-")).toBe(true);
+	});
+
+	test("should generate unique keys across multiple instances", () => {
+		const toggle1 = new Toggle({
+			applicationId: "myapp",
+			environment: "production",
+		});
+		const toggle2 = new Toggle({
+			applicationId: "myapp",
+			environment: "production",
+		});
+
+		const key1 = toggle1.generateTargetKey();
+		const key2 = toggle2.generateTargetKey();
+
+		expect(key1).not.toBe(key2);
+	});
+
+	test("should handle very long applicationId", () => {
+		const longAppId = "a".repeat(100);
+		const toggle = new Toggle({
+			applicationId: longAppId,
+			environment: "prod",
+		});
+		const key = toggle.generateTargetKey();
+
+		expect(key.startsWith(longAppId)).toBe(true);
+		expect(key).toContain("prod");
+	});
+
+	test("should handle very long environment", () => {
+		const longEnv = "e".repeat(100);
+		const toggle = new Toggle({
+			applicationId: "app",
+			environment: longEnv,
+		});
+		const key = toggle.generateTargetKey();
+
+		expect(key.startsWith("app")).toBe(true);
+		expect(key).toContain(longEnv);
+	});
+
+	test("should generate key with only environment when explicitly set without app", () => {
+		const toggle = new Toggle({
+			environment: "production",
+		});
+		const key = toggle.generateTargetKey();
+		const parts = key.split("-");
+
+		expect(parts.length).toBe(2);
+		expect(parts[0]).toBe("production");
+		expect(parts[1]).toBeTruthy();
+	});
+
+	test("should handle numeric values in applicationId", () => {
+		const toggle = new Toggle({
+			applicationId: "app123",
+			environment: "prod",
+		});
+		const key = toggle.generateTargetKey();
+
+		expect(key).toContain("app123");
+		expect(key).toContain("prod");
+	});
+
+	test("should handle numeric values in environment", () => {
+		const toggle = new Toggle({
+			applicationId: "myapp",
+			environment: "env2",
+		});
+		const key = toggle.generateTargetKey();
+
+		expect(key).toContain("myapp");
+		expect(key).toContain("env2");
+	});
+
+	test("should maintain consistent format across multiple calls", () => {
+		const toggle = new Toggle({
+			applicationId: "testapp",
+			environment: "staging",
+		});
+
+		const keys = Array.from({ length: 5 }, () => toggle.generateTargetKey());
+
+		// All keys should start with the same prefix
+		keys.forEach((key) => {
+			expect(key.startsWith("testapp-staging-")).toBe(true);
+		});
+
+		// All keys should be unique
+		const uniqueKeys = new Set(keys);
+		expect(uniqueKeys.size).toBe(5);
+	});
+});
