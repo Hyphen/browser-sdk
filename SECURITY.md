@@ -1,6 +1,6 @@
 # Security Policy
 
-To report a security vulnerability, please post an issue in our repository for [@hyphen/toggle](https://github.com/hyphen/nodejs-toggle-sdk/issues) and mark it with `security vulnerability`. You need to add in the issue description the following information:
+To report a security vulnerability, please post an issue in our repository for [@hyphen/browser-sdk](https://github.com/hyphen/browser-sdk/issues) and mark it with `security vulnerability`. You need to add in the issue description the following information:
 
 - **Vulnerability Type**: Describe the type of vulnerability (e.g., XSS, CSRF, SQL Injection).
 - **Vulnerability Description**: Describe the vulnerability in detail, including how it can be exploited and what impact it may have.
