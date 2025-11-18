@@ -8,9 +8,9 @@
   "browser": "dist/index.browser.js",
   "exports": {
     ".": {
-      "browser": "./dist/index.browser.js",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.cjs",
+      "browser": "./dist/index.browser.js"
     }
   },
   "types": "dist/index.d.ts",
