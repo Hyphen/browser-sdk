@@ -3,14 +3,15 @@
   "version": "1.0.3",
   "description": "Hyphen SDK for Browser / Javascript",
   "type": "module",
-  "main": "dist/index.cjs",
+  "main": "dist/index.js",
   "module": "dist/index.js",
   "browser": "dist/index.browser.js",
   "exports": {
     ".": {
-      "browser": "./dist/index.browser.js",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.cjs",
+      "browser": "./dist/index.browser.js"
     }
   },
   "types": "dist/index.d.ts",
