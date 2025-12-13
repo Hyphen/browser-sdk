@@ -1,6 +1,6 @@
 {
   "name": "@hyphen/browser-sdk",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Hyphen SDK for Browser / Javascript",
   "type": "module",
   "main": "dist/index.js",
