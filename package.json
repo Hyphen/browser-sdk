@@ -1,6 +1,6 @@
 {
   "name": "@hyphen/browser-sdk",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Hyphen SDK for Browser / Javascript",
   "type": "module",
   "main": "dist/index.js",
@@ -9,9 +9,9 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "browser": "./dist/index.browser.js",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "require": "./dist/index.cjs",
+      "browser": "./dist/index.browser.js"
     }
   },
   "types": "dist/index.d.ts",
