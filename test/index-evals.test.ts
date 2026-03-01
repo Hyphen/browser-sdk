@@ -1,5 +1,5 @@
 import process from "node:process";
-import dotenv from "dotenv";
+import { env } from "@hyphen/sdk";
 import { describe, expect, test } from "vitest";
 import { Toggle, type ToggleContext } from "../src/index.js";
 
@@ -10,7 +10,7 @@ hyphen-sdk-number
 hyphen-sdk-string
 */
 
-dotenv.config({ quiet: true });
+env();
 
 const hyphenPublicApiKey = process.env.HYPHEN_PUBLIC_API_KEY;
 const hyphenApplicationId = process.env.HYPHEN_APPLICATION_ID;
