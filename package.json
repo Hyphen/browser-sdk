@@ -19,7 +19,7 @@
     "test": "pnpm lint && vitest run --coverage",
     "test:ci": "biome check --error-on-warnings && vitest run --coverage",
     "build": "rimraf ./dist && tsup",
-    "clean": "rimraf ./dist pnpm-lock.yaml node_modules coverage",
+    "clean": "rimraf ./dist node_modules coverage",
     "prepare": "rimraf ./dist && tsup"
   },
   "keywords": [
