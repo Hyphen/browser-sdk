@@ -514,9 +514,18 @@ export class Toggle extends Hookified {
 	public getOrgIdFromPublicKey(publicKey: string): string | undefined {
 		try {
 			const keyWithoutPrefix = publicKey.replace(/^public_/, "");
+			// Browsers / modern runtimes expose `atob`; fall back to Node's
+			// `Buffer` without depending on @types/node globally.
+			const nodeBuffer = (
+				globalThis as typeof globalThis & {
+					Buffer?: {
+						from(input: string, encoding: string): { toString(): string };
+					};
+				}
+			).Buffer;
 			const decoded = globalThis.atob
 				? globalThis.atob(keyWithoutPrefix)
-				: Buffer.from(keyWithoutPrefix, "base64").toString();
+				: (nodeBuffer?.from(keyWithoutPrefix, "base64").toString() ?? "");
 			const [orgId] = decoded.split(":");
 			const isValidOrgId = /^[a-zA-Z0-9_-]+$/.test(orgId);
 			return isValidOrgId ? orgId : undefined;
