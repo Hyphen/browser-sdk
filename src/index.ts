@@ -8,6 +8,7 @@ import {
 } from "./types.js";
 
 export type { ToggleContext } from "./types.js";
+export { ToggleEvents } from "./types.js";
 
 export type ToggleOptions = {
 	/**
@@ -47,7 +48,11 @@ export class Toggle extends Hookified {
 		`${Math.random().toString(36).substring(7)}`;
 
 	constructor(options?: ToggleOptions) {
-		super();
+		// hookified v2 defaults `throwOnEmptyListeners` to `true`, which would
+		// cause `emit(ToggleEvents.Error, ...)` to re-throw when no listener is
+		// attached. The SDK swallows evaluation errors and returns the caller's
+		// default value, so we opt back into the v1 behavior.
+		super({ throwOnEmptyListeners: false });
 
 		if (options?.applicationId) {
 			this._applicationId = options.applicationId;

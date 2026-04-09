@@ -21,6 +21,7 @@ The Hyphen Browser SDK is used as a base library to get evaluations and works fo
     - [Object Toggles](#object-toggles)
   - [Using the Generic `get()` Method](#using-the-generic-get-method)
   - [Context Override](#context-override)
+  - [Error Handling and Events](#error-handling-and-events)
   - [Browser Integration Example](#browser-integration-example)
     - [Using ES Modules](#using-es-modules)
     - [Using jsDelivr CDN](#using-jsdelivr-cdn)
@@ -124,6 +125,32 @@ const result = await toggle.getBoolean('premium-feature', false, {
   context: customContext
 });
 ```
+
+## Error Handling and Events
+
+The `Toggle` client extends [`Hookified`](https://hookified.org), so it exposes
+a standard event-emitter surface. Toggle evaluation errors are swallowed by
+design (the SDK falls back to your `defaultValue`) and re-emitted on the
+`ToggleEvents.Error` event so you can observe them without breaking the caller.
+
+```javascript
+import { Toggle, ToggleEvents } from '@hyphen/browser-sdk';
+
+const toggle = new Toggle({
+  publicApiKey: 'public_your-api-key-here',
+  applicationId: 'your-app-id',
+});
+
+toggle.on(ToggleEvents.Error, (error) => {
+  console.error('Toggle evaluation failed:', error);
+});
+
+// Still returns `false` on failure — the listener above also fires.
+const isFeatureEnabled = await toggle.getBoolean('feature-flag', false);
+```
+
+You can use `once`, `off`, and `removeAllListeners` as you would with any
+Node-style event emitter.
 
 ## Browser Integration Example
 
