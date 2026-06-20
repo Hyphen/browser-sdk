@@ -6,7 +6,7 @@ on:
     types: [released]
 
 permissions:
-  contents: read    
+  contents: read
 
 env:
   HYPHEN_PUBLIC_API_KEY: ${{ secrets.HYPHEN_PUBLIC_API_KEY }}
@@ -19,18 +19,26 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v6
+
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 24
+        cache: 'pnpm'
+
+    - name: Enable Corepack
+      run: corepack enable
 
     - name: Install Dependencies
-      run: npm install pnpm -g && pnpm install
+      run: pnpm install
 
-    - name: Build    
+    - name: Build
       run: pnpm build
 
-    - name: Testing    
+    - name: Testing
       run: pnpm test:ci
 
     - name: Publish
@@ -39,4 +47,3 @@ jobs:
         npm publish --ignore-scripts --access public
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
