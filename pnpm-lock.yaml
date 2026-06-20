@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       hookified:
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^3.0.0
+        version: 3.0.0
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.5.0
