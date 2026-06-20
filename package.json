@@ -38,7 +38,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.0",
     "@faker-js/faker": "^10.5.0",
-    "@hyphen/sdk": "^3.0.1",
+    "@hyphen/sdk": "^4.0.0",
     "@swc/core": "^1.15.41",
     "@types/node": "^24.13.2",
     "@vitest/coverage-v8": "^4.1.9",
