@@ -30,12 +30,6 @@ jobs:
         node-version: 24
         cache: 'pnpm'
 
-    - name: Enable Corepack
-      run: corepack enable
-
-    - name: Update npm
-      run: npm install -g npm@latest
-
     - name: Install Dependencies
       run: pnpm install
 
@@ -46,4 +40,4 @@ jobs:
       run: pnpm test:ci
 
     - name: Publish
-      run: npm publish --ignore-scripts --access public
+      run: pnpm publish --ignore-scripts --no-git-checks --access public
