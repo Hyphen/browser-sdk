@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   HYPHEN_PUBLIC_API_KEY: ${{ secrets.HYPHEN_PUBLIC_API_KEY }}
@@ -27,10 +28,6 @@ jobs:
       uses: actions/setup-node@v6
       with:
         node-version: 24
-        cache: 'pnpm'
-
-    - name: Enable Corepack
-      run: corepack enable
 
     - name: Install Dependencies
       run: pnpm install
@@ -42,8 +39,4 @@ jobs:
       run: pnpm test:ci
 
     - name: Publish
-      run: |
-        npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-        npm publish --ignore-scripts --access public
-      env:
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: pnpm publish --ignore-scripts --no-git-checks --access public
