@@ -35,6 +35,14 @@
   ],
   "author": "Team Hyphen <hello@hyphen.ai>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hyphen/browser-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Hyphen/browser-sdk/issues"
+  },
+  "homepage": "https://github.com/Hyphen/browser-sdk#readme",
   "devDependencies": {
     "@biomejs/biome": "^2.5.0",
     "@faker-js/faker": "^10.5.0",
