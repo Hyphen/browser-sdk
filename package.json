@@ -44,17 +44,17 @@
   },
   "homepage": "https://github.com/Hyphen/browser-sdk#readme",
   "devDependencies": {
-    "@biomejs/biome": "^2.5.0",
+    "@biomejs/biome": "^2.5.5",
     "@faker-js/faker": "^10.5.0",
-    "@hyphen/sdk": "^4.0.0",
+    "@hyphen/sdk": "^4.0.1",
     "@swc/core": "^1.15.41",
     "@types/node": "^24.13.2",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@vitest/coverage-v8": "^4.1.10",
     "rimraf": "^6.1.3",
     "tsd": "^0.33.0",
     "tsdown": "^0.22.3",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   },
   "files": [
     "dist",
