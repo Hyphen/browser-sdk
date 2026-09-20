@@ -28,4 +28,4 @@ This repository follows the [defense-in-depth](https://github.com/jaredwray/agen
 - There is no Dependabot config; dependency updates land through pull requests.
 - Codespaces and Cursor Cloud Agents install through Aikido Safe Chain; package-manager shims must not be bypassed.
 - The Codespaces Dev Container image is pinned by digest (`name:<tag>@sha256:<digest>`), not a floating tag.
-- Dependencies install through pnpm with a 7-day cooldown on new versions and `trustPolicy: no-downgrade`.
+- Dependencies install through pnpm with a 7-day cooldown on new versions, lifecycle scripts blocked by default, and `trustPolicy: no-downgrade`.
