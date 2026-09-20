@@ -16,7 +16,7 @@ env:
 
 jobs:
   build-test:
-
+    name: build-test-${{ matrix.node-version }}
     runs-on: ubuntu-latest
 
     strategy:
