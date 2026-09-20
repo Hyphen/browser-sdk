@@ -31,7 +31,7 @@ Profile: npm library · public
 - [x] Workflow `name:` and job `name:` contain no spaces (kebab-case) so they can be set as required status checks — PR #91
 - [x] `persist-credentials: false` on checkouts that don't push — PR #92
 - [x] No `pull_request_target` on workflows that run untrusted PR code — verified on main
-- [ ] Artifact-publishing workflows disable `actions/setup-node` default caching (`package-manager-cache: false`) to prevent cache poisoning (PR pending)
+- [ ] Artifact-publishing workflows disable `actions/setup-node` default caching (`package-manager-cache: false`) to prevent cache poisoning (PR #93 pending)
 - [ ] No npm tokens (or other registry credentials) in Actions secrets
 
 ## 5. npm publishing — npm libraries only
