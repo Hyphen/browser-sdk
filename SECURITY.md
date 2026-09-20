@@ -22,7 +22,7 @@ We will acknowledge receipt, work with you on a coordinated disclosure timeline,
 
 This repository follows the [defense-in-depth](https://github.com/jaredwray/agentic/blob/main/skills/security/defense-in-depth-nodejs/SKILL.md) hardening checklist; progress is tracked in [DEFENSE_IN_DEPTH.md](./DEFENSE_IN_DEPTH.md). Measures currently in place:
 
-- CI workflows default to read-only `contents` permissions; generated output is not committed back from CI; every action is pinned to a full commit SHA.
+- CI workflows default to read-only `contents` permissions; generated output is not committed back from CI; every action is pinned to a full commit SHA; Socket Firewall (`sfw`) wraps `pnpm install`.
 - Workflows that run untrusted pull-request code do not use `pull_request_target`.
 - The package manager is pinned in `package.json` (`packageManager`).
 - There is no Dependabot config; dependency updates land through pull requests.
