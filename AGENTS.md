@@ -29,3 +29,11 @@ Hyphen Browser SDK is a TypeScript library for feature flag (toggle) evaluation 
 - `src/index.ts` - Main Toggle client class with evaluation methods (getBoolean, getString, getNumber, getObject, get)
 - `src/types.ts` - TypeScript type definitions for toggle contexts, options, and responses
 - `test/` - Test files (Vitest)
+
+## Safe Chain
+
+Package installs in this environment go through Aikido Safe Chain shims. Never bypass them:
+
+- Keep `~/.safe-chain/shims` first on `PATH`.
+- Do not call unshimmed `npm`, `pnpm`, `npx`, or `pnpx`.
+- Do not install packages with `curl | sh` or by pointing at a package manager outside the shim directory.
