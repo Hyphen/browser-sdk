@@ -35,19 +35,19 @@ Profile: npm library · public
 - [x] No npm tokens (or other registry credentials) in Actions secrets — verified (no npm/registry tokens in workflow YAML; publish uses OIDC `id-token`)
 
 ## 5. npm publishing — npm libraries only
-- [ ] OIDC trusted publishing configured **stage-only** on npmjs.com for the publish workflow — it can stage, never publish live (manual)
+- [x] OIDC trusted publishing configured **stage-only** on npmjs.com for the publish workflow — it can stage, never publish live (manual) — verified (maintainer)
 - [x] `.github/workflows/release.yaml` packs then stages with `pnpm stage publish ./packed/*.tgz --no-git-checks` — PR #94
-- [ ] Maintainer promotes staged versions with 2FA (manual)
-- [ ] Drydock connected — staged releases reviewed before promotion (manual)
-- [ ] No direct publish rights: package requires 2FA and disallows tokens (manual)
+- [x] Maintainer promotes staged versions with 2FA (manual) — verified (maintainer)
+- [x] Drydock connected — staged releases reviewed before promotion (manual) — verified (maintainer)
+- [x] No direct publish rights: package requires 2FA and disallows tokens (manual) — verified (maintainer)
 - [x] `package.json` `repository.url` accurate so provenance maps to this repo — verified on main
 
 ## 6. Security tooling
 - [x] Aikido runs on every build — verified (Aikido Security GitHub app on pull requests)
-- [ ] Aikido release gate: the release workflow's stage-publish job `needs:` a passing `scan-release` (PR #95 pending)
-- [ ] Socket reviews every PR that changes dependencies
+- [x] Aikido release gate: the release workflow's stage-publish job `needs:` a passing `scan-release` — PR #95
+- [ ] Socket reviews every PR that changes dependencies — skipped (maintainer declined the Socket Security GitHub app; Socket Firewall in CI remains) (PR #96 pending)
 
 ## 7. Repository lockdown
 - [ ] Phishing-resistant 2FA (passkeys / hardware keys) on the GitHub and npm accounts (manual)
 - [ ] Recovery codes stored offline in a password manager (manual)
-- [ ] `lockdown-repo.sh` applied by a repo admin (never committed to this repo); `--check` with `--required-checks` and `--allowed-actions` passes (PRs required on the default branch, merges blocked unless required status checks pass, tag ruleset, immutable releases, fork-PR approval (public repos), read-only workflow tokens, Actions allowlist, secret scanning, Dependabot disabled, private vulnerability reporting (public repos))
+- [x] `lockdown-repo.sh` applied; `--check` with `--required-checks "zizmor,build-test-22,build-test-24,build-test-26,analyze-javascript,build"` and `--allowed-actions "pnpm/*,codecov/*"` passes (PRs required on the default branch, merges blocked unless required status checks pass, tag ruleset, immutable releases, fork-PR approval (public repos), read-only workflow tokens, Actions allowlist, secret scanning, Dependabot disabled, private vulnerability reporting (public repos)) (PR #96 pending)
