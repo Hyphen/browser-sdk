@@ -44,8 +44,8 @@ Profile: npm library · public
 
 ## 6. Security tooling
 - [x] Aikido runs on every build — verified (Aikido Security GitHub app on pull requests)
-- [ ] Aikido release gate: the release workflow's stage-publish job `needs:` a passing `scan-release` (PR #95 pending)
-- [ ] Socket reviews every PR that changes dependencies
+- [x] Aikido release gate: the release workflow's stage-publish job `needs:` a passing `scan-release` — PR #95
+- [x] Socket reviews every PR that changes dependencies — skipped (maintainer declined the Socket Security GitHub app; Socket Firewall in CI remains)
 
 ## 7. Repository lockdown
 - [ ] Phishing-resistant 2FA (passkeys / hardware keys) on the GitHub and npm accounts (manual)
