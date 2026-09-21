@@ -22,6 +22,10 @@ We will acknowledge receipt, work with you on a coordinated disclosure timeline,
 
 This repository follows the [defense-in-depth](https://github.com/jaredwray/agentic/blob/main/skills/security/defense-in-depth-nodejs/SKILL.md) hardening checklist; progress is tracked in [DEFENSE_IN_DEPTH.md](./DEFENSE_IN_DEPTH.md). Measures currently in place:
 
+- All changes land through pull requests — direct pushes to `main` are blocked, and merging requires passing status checks.
+- Tags can only be created by repository admins; published GitHub Releases are immutable (assets and tags cannot be changed after publish).
+- Workflow runs from outside collaborators always require maintainer approval, and only allowlisted GitHub Actions can run.
+- Secret scanning and push protection are enabled; private vulnerability reporting is enabled.
 - CI workflows default to read-only `contents` permissions; generated output is not committed back from CI; every action is pinned to a full commit SHA; Socket Firewall (`sfw`) wraps `pnpm install`; workflows are security-linted with zizmor on every PR.
 - Release jobs disable `setup-node`'s default package-manager cache.
 - The release workflow stages packages with `pnpm stage publish` (pack then stage a tarball); it does not publish live. CI authenticates with stage-only OIDC trusted publishing; Drydock reviews the staged artifact; a maintainer promotes with 2FA. There are no npm tokens.
