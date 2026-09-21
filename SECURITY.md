@@ -24,7 +24,7 @@ This repository follows the [defense-in-depth](https://github.com/jaredwray/agen
 
 - CI workflows default to read-only `contents` permissions; generated output is not committed back from CI; every action is pinned to a full commit SHA; Socket Firewall (`sfw`) wraps `pnpm install`; workflows are security-linted with zizmor on every PR.
 - Release jobs disable `setup-node`'s default package-manager cache.
-- The release workflow stages packages with `pnpm stage publish` (pack then stage a tarball); it does not publish live.
+- The release workflow stages packages with `pnpm stage publish` (pack then stage a tarball); it does not publish live. CI authenticates with stage-only OIDC trusted publishing; Drydock reviews the staged artifact; a maintainer promotes with 2FA. There are no npm tokens.
 - Aikido Security scans pull requests; the release stage job does not run unless an Aikido `scan-release` gate passes.
 - Workflows that run untrusted pull-request code do not use `pull_request_target`.
 - The package manager is pinned in `package.json` (`packageManager`).
